@@ -1,0 +1,332 @@
+=== REQUEST BODY & RESPONSE SPECIFICATIONS ===
+
+COMPANY ENDPOINTS:
+
+POST /company - Create Company
+Request Body:
+{
+  "name": "Innovate Corp",
+  "EIN": "12-3456789",
+  "startDate": "2023-01-15",
+  "stateIncorporated": "Delaware",
+  "contactPersonName": "Jane Doe",
+  "contactPersonPhNumber": "555-123-4567",
+  "address1": "123 Tech Avenue",
+  "address2": "Suite 100",
+  "city": "Palo Alto",
+  "state": "CA",
+  "zip": "94301"
+}
+
+Response:
+{
+  "status": "success",
+  "id": 1,
+  "message": "Company created successfully"
+}
+
+PUT /company/{id} - Update Company
+Request Body:
+{
+  "name": "Updated Corp Name",
+  "EIN": "12-3456789",
+  "startDate": "2023-01-15",
+  "stateIncorporated": "Delaware",
+  "contactPersonName": "Jane Doe",
+  "contactPersonPhNumber": "555-123-4567",
+  "address1": "123 Tech Avenue",
+  "address2": "Suite 100",
+  "city": "Palo Alto",
+  "state": "CA",
+  "zip": "94301"
+}
+
+Response:
+{
+  "status": "success",
+  "message": "Company updated successfully"
+}
+
+DELETE /company/{id} - Delete Company
+Request Body: None
+
+Response:
+{
+  "status": "success",
+  "message": "Company deleted successfully"
+}
+
+GET /companies - Get All Companies
+Request Body: None
+
+Response:
+{
+  "companies": [
+    {
+      "id": 1,
+      "name": "TechNova Inc",
+      "ein": "12-3456789",
+      "startDate": "2021-03-15",
+      "stateIncorp": "California",
+      "contactName": "John Carter",
+      "contactPhone": "2134567890",
+      "address1": "123 Innovation Drive",
+      "address2": "Suite 400",
+      "city": "Los Angeles",
+      "state": "CA",
+      "zip": "90001"
+    }
+  ]
+}
+
+TASK ENDPOINTS:
+
+POST /tasks - Create Task
+Request Body:
+{
+  "companyId": 123,
+  "name": "Finalize Q4 Report",
+  "description": "Compile all departmental data and finalize the quarterly performance report.",
+  "dueDate": "2024-12-20",
+  "status": "In Progress"
+}
+
+Response:
+{
+  "status": "success",
+  "id": 2915,
+  "message": "Task created successfully"
+}
+
+PUT /tasks/{id} - Update Task
+Request Body:
+{
+  "name": "Updated Task Name",
+  "description": "Updated task description",
+  "dueDate": "2024-12-25",
+  "status": "Done",
+  "completionDate": "2024-12-20"
+}
+
+Response:
+{
+  "status": "success",
+  "message": "Task updated successfully"
+}
+
+DELETE /tasks/{id} - Delete Task
+Request Body: None
+
+Response:
+{
+  "status": "success",
+  "message": "Task deleted successfully"
+}
+
+GET /tasks - Get All Tasks
+Request Body: None
+
+Response:
+{
+  "status": "success",
+  "tasks": [
+    {
+      "id": 123,
+      "companyId": 456,
+      "name": "Complete Project Alpha",
+      "description": "Finalize all components of Project Alpha",
+      "dueDate": "2024-12-31",
+      "status": "In Progress",
+      "completionDate": null
+    }
+  ]
+}
+
+GET /tasks/company/{companyId} - Get Tasks by Company
+Request Body: None
+
+Response:
+{
+  "status": "success",
+  "companyId": 456,
+  "tasks": [
+    {
+      "id": 123,
+      "companyId": 456,
+      "name": "Complete Project Alpha",
+      "description": "Finalize all components of Project Alpha",
+      "dueDate": "2024-12-31",
+      "status": "In Progress",
+      "completionDate": null
+    },
+    {
+      "id": 124,
+      "companyId": 456,
+      "name": "Monthly Report",
+      "description": "Submit monthly performance report",
+      "dueDate": "2024-12-15",
+      "status": "Pending",
+      "completionDate": null
+    }
+  ]
+}
+
+TEMPLATE ENDPOINTS:
+
+POST /templates - Create Template
+Request Body:
+{
+  "name": "Monthly Report Template",
+  "description": "Standard monthly reporting template",
+  "estimatedDays": 5
+}
+
+Response:
+{
+  "status": "success",
+  "id": 123,
+  "message": "Template created successfully"
+}
+
+DELETE /templates/{id} - Delete Template
+Request Body: None
+
+Response:
+{
+  "status": "success",
+  "message": "Template deleted successfully"
+}
+
+GET /templates - Get All Templates
+Request Body: None
+
+Response:
+{
+  "status": "success",
+  "templates": [
+    {
+      "id": 123,
+      "name": "Monthly Report Template",
+      "description": "Standard monthly reporting template",
+      "estimatedDays": 5
+    }
+  ]
+}
+
+POST /templates/{id}/assign - Assign Template
+Request Body:
+{
+  "companyIds": [123, 456, 789],
+  "startDate": "2024-01-01",
+  "dueDate": "2024-01-31"
+}
+
+Response:
+{
+  "status": "success",
+  "message": "Template assigned successfully",
+  "tasksCreated": 3
+}
+
+
+
+NOTIFICATION ENDPOINTS:
+
+POST /notifications/email - Send Email Notification
+Request Body:
+{
+  "companyName": "TechNova Inc",
+  "contactName": "John Carter",
+  "contactEmail": "john@technova.com",
+  "tasks": [
+    {
+      "name": "Complete Project Alpha",
+      "dueDate": "2024-12-31",
+      "description": "Finalize all components"
+    }
+  ],
+  "daysBefore": 7,
+  "ccEmails": ["manager@company.com", "admin@company.com"]
+}
+
+Response:
+{
+  "status": "success",
+  "message": "Email notification sent successfully",
+  "emailsSent": 3
+}
+
+POST /reminders - Set Task Reminder
+Request Body:
+{
+  "taskId": 123,
+  "reminderDate": "2024-12-24",
+  "reminderTime": "09:00",
+  "userEmail": "user@company.com"
+}
+
+Response:
+{
+  "status": "success",
+  "id": 456,
+  "message": "Reminder set successfully"
+}
+
+AUTHENTICATION ENDPOINTS:
+
+POST /auth/login - User Login
+Request Body:
+{
+  "email": "user@company.com"
+}
+
+Response:
+{
+  "status": "success",
+  "user": {
+    "email": "user@company.com",
+    "name": "John Doe",
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+  },
+  "message": "Login successful"
+}
+
+=== STANDARD RESPONSE PATTERNS ===
+
+Success Response:
+{
+  "status": "success",
+  "message": "Operation completed successfully",
+  "id": 123 (for create operations),
+  "data": {} (for get operations)
+}
+
+Error Response:
+{
+  "status": "error",
+  "message": "Error description",
+  "code": "ERROR_CODE"
+}
+
+=== FIELD VALIDATION RULES ===
+
+Required Fields:
+- Company: name, EIN, startDate, stateIncorporated, contactPersonName, contactPersonPhNumber, address1, city, state, zip
+- Task: companyId, name, dueDate, status
+- Task Assignment: taskName, companyIds, dueDate, status
+- Template: name, estimatedDays
+- Template Assignment: companyIds, startDate, dueDate
+- Email: companyName, contactName, contactEmail, tasks, daysBefore
+- Reminder: taskId, reminderDate, reminderTime, userEmail
+
+Optional Fields:
+- Company: address2
+- Task: description, completionDate
+- Task Assignment: description
+- Template: description
+- Email: ccEmails
+- All: Any field can be empty string but not null
+
+Date Format: YYYY-MM-DD
+Time Format: HH:MM (24-hour)
+Status Values: "Pending", "In Progress", "Done"

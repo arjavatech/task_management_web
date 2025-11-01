@@ -1,0 +1,351 @@
+COMPANY TASK MANAGEMENT - API ENDPOINTS STATUS
+
+ACTUAL ENDPOINTS USED:
+- Companies GET: https://taskflow.free.beeceptor.com/companies
+- Companies POST: https://arjava.proxy.beeceptor.com/company
+- Companies PUT: https://arjava.proxy.beeceptor.com/companies/{id}
+- Companies DELETE: https://arjava.proxy.beeceptor.com/deletecompany/{id}
+- Tasks: https://arjava.proxy.beeceptor.com/tasks
+- Task Update: https://arjava.proxy.beeceptor.com/updatetasks/{id}
+- Task Delete: https://arjava.proxy.beeceptor.com/deletetasks/{id}
+- Templates: https://arjava.proxy.beeceptor.com/templates
+- Template Delete: https://arjava.proxy.beeceptor.com/deletetemplate/{id}
+- Template Assign: https://arjava.proxy.beeceptor.com/templates/{id}/assign
+
+=== COMPANIES ===
+
+✅ IMPLEMENTED:
+1. GET https://taskflow.free.beeceptor.com/companies
+   - Status: WORKING
+   - Used in: Login function to fetch companies
+   - Variables: None
+   - Response: 
+   {
+     "companies": [
+       {
+         "id": 1,
+         "name": "string",
+         "ein": "string",
+         "startDate": "YYYY-MM-DD",
+         "stateIncorp": "string",
+         "contactName": "string",
+         "contactPhone": "string",
+         "address1": "string",
+         "address2": "string",
+         "city": "string",
+         "state": "string",
+         "zip": "string"
+       }
+     ]
+   }
+
+✅ IMPLEMENTED:
+2. POST https://arjava.proxy.beeceptor.com/company
+   - Status: WORKING
+   - Used in: addCompany function
+   - Variables: name, ein, startDate, stateIncorporated, contactName, contactPhone, address1, address2, city, state, zipCode
+   - Request Body:
+   {
+     "name": "string",
+     "EIN": "string",
+     "startDate": "YYYY-MM-DD",
+     "stateIncorporated": "string",
+     "contactPersonName": "string",
+     "contactPersonPhNumber": "string",
+     "address1": "string",
+     "address2": "string",
+     "city": "string",
+     "state": "string",
+     "zip": "string"
+   }
+   - Response:
+   {
+     "status": "success",
+     "id": 1,
+     "message": "Company created successfully"
+   }
+
+✅ IMPLEMENTED:
+3. PUT https://arjava.proxy.beeceptor.com/companies/{id}
+   - Status: WORKING
+   - Used in: updateCompany function
+   - Variables: id, name, ein, startDate, stateIncorporated, contactName, contactPhone, address1, address2, city, state, zipCode
+   - Request Body:
+   {
+     "name": "string",
+     "EIN": "string",
+     "startDate": "YYYY-MM-DD",
+     "stateIncorporated": "string",
+     "contactPersonName": "string",
+     "contactPersonPhNumber": "string",
+     "address1": "string",
+     "address2": "string",
+     "city": "string",
+     "state": "string",
+     "zip": "string"
+   }
+   - Response:
+   {
+     "status": "success",
+     "message": "Company updated successfully"
+   }
+
+✅ IMPLEMENTED:
+4. DELETE https://arjava.proxy.beeceptor.com/deletecompany/{id}
+   - Status: WORKING
+   - Used in: deleteCompany function
+   - Variables: id
+   - Request Body: None
+   - Response:
+   {
+     "status": "success",
+     "message": "Company deleted successfully"
+   }
+
+=== TASKS ===
+
+✅ IMPLEMENTED:
+5. GET https://arjava.proxy.beeceptor.com/tasks
+   - Status: WORKING
+   - Used in: loadTasks function
+   - Variables: None
+   - Request Body: None
+   - Response:
+   {
+     "tasks": [
+       {
+         "id": 123,
+         "companyId": 456,
+         "name": "string",
+         "description": "string",
+         "dueDate": "YYYY-MM-DD",
+         "status": "Pending|In Progress|Done",
+         "completionDate": "YYYY-MM-DD"
+       }
+     ]
+   }
+
+❌ NOT IMPLEMENTED:
+6. GET https://arjava.proxy.beeceptor.com/tasks/company/{companyId}
+   - Description: Get tasks by company ID
+   - Status: OPTIONAL (can filter client-side)
+   - Variables: companyId
+   - Request Body: None
+   - Response: Same as GET /tasks but filtered
+
+✅ IMPLEMENTED:
+7. POST https://arjava.proxy.beeceptor.com/tasks
+   - Status: WORKING
+   - Used in: addTask function
+   - Variables: companyId, name, description, dueDate, status
+   - Request Body:
+   {
+     "companyId": 123,
+     "name": "string",
+     "description": "string",
+     "dueDate": "YYYY-MM-DD",
+     "status": "Pending|In Progress|Done"
+   }
+   - Response:
+   {
+     "status": "success",
+     "id": 2915,
+     "message": "Task created successfully"
+   }
+
+✅ IMPLEMENTED:
+8. PUT https://arjava.proxy.beeceptor.com/updatetasks/{id}
+   - Status: WORKING
+   - Used in: updateTask function
+   - Variables: id, name, description, dueDate, status, completionDate
+   - Request Body:
+   {
+     "name": "string",
+     "description": "string",
+     "dueDate": "YYYY-MM-DD",
+     "status": "Pending|In Progress|Done",
+     "completionDate": "YYYY-MM-DD"
+   }
+   - Response:
+   {
+     "status": "success",
+     "message": "Task updated successfully"
+   }
+
+✅ IMPLEMENTED:
+9. DELETE https://arjava.proxy.beeceptor.com/deletetasks/{id}
+   - Status: WORKING
+   - Used in: deleteTask function
+   - Variables: id
+   - Request Body: None
+   - Response:
+   {
+     "status": "success",
+     "message": "Task deleted successfully"
+   }
+
+=== TASK TEMPLATES ===
+
+✅ IMPLEMENTED:
+10. GET https://arjava.proxy.beeceptor.com/templates
+    - Status: WORKING
+    - Used in: loadTemplates function
+    - Variables: None
+    - Request Body: None
+    - Response:
+    {
+      "templates": [
+        {
+          "id": 123,
+          "name": "string",
+          "description": "string",
+          "estimatedDays": 5
+        }
+      ]
+    }
+
+✅ IMPLEMENTED:
+11. POST https://arjava.proxy.beeceptor.com/templates
+    - Status: WORKING
+    - Used in: addTaskTemplate function
+    - Variables: name, description, estimatedDays
+    - Request Body:
+    {
+      "name": "string",
+      "description": "string",
+      "estimatedDays": 5
+    }
+    - Response:
+    {
+      "status": "success",
+      "id": 123,
+      "message": "Template created successfully"
+    }
+
+✅ IMPLEMENTED:
+12. DELETE https://arjava.proxy.beeceptor.com/deletetemplate/{id}
+    - Status: WORKING
+    - Used in: deleteTemplate function
+    - Variables: id
+    - Request Body: None
+    - Response:
+    {
+      "status": "success",
+      "message": "Template deleted successfully"
+    }
+
+✅ IMPLEMENTED:
+13. POST https://arjava.proxy.beeceptor.com/templates/{id}/assign
+    - Status: WORKING
+    - Used in: assignTemplate function
+    - Variables: id, companyIds, startDate, dueDate
+    - Request Body:
+    {
+      "companyIds": [123, 456, 789],
+      "startDate": "YYYY-MM-DD",
+      "dueDate": "YYYY-MM-DD"
+    }
+    - Response:
+    {
+      "status": "success",
+      "message": "Template assigned successfully",
+      "tasksCreated": 3
+    }
+
+=== AUTHENTICATION ===
+
+❌ NOT IMPLEMENTED:
+14. POST https://arjava.proxy.beeceptor.com/auth/login
+    - Description: User login
+    - Status: OPTIONAL (currently uses simple email storage)
+    - Current: Stores email in localStorage
+    - Variables: email
+    - Request Body:
+    {
+      "email": "user@example.com"
+    }
+    - Response:
+    {
+      "status": "success",
+      "user": {
+        "email": "user@example.com",
+        "name": "string",
+        "token": "jwt_token_string"
+      },
+      "message": "Login successful"
+    }
+
+=== IMPLEMENTATION STATUS SUMMARY ===
+
+✅ COMPLETED (12/13 core APIs):
+1. ✅ GET /companies - Fetch companies
+2. ✅ POST /company - Create company
+3. ✅ PUT /companies/{id} - Update company
+4. ✅ DELETE /deletecompany/{id} - Delete company
+5. ✅ GET /tasks - Fetch all tasks
+6. ✅ POST /tasks - Create task
+7. ✅ PUT /updatetasks/{id} - Update task
+8. ✅ DELETE /deletetasks/{id} - Delete task
+9. ✅ GET /templates - Fetch templates
+10. ✅ POST /templates - Create template
+11. ✅ DELETE /deletetemplate/{id} - Delete template
+12. ✅ POST /templates/{id}/assign - Assign template
+
+❌ REMAINING (1/13 core APIs):
+1. ❌ GET /tasks/company/{companyId} - Get tasks by company (OPTIONAL)
+
+❌ OPTIONAL (Enhanced features):
+5. ❌ POST /notifications/email - Email notifications
+6. ❌ POST /reminders - Task reminders
+7. ❌ POST /auth/login - Proper authentication
+
+=== CURRENT API FIELD MAPPINGS ===
+
+Company API Fields (POST /company):
+- name → name
+- EIN → ein (app uses 'ein')
+- stateIncorporated → stateIncorporated
+- contactPersonName → contactName (app uses 'contactName')
+- contactPersonPhNumber → contactPhone (app uses 'contactPhone')
+- address1, address2, city, state → same
+- zip → zipCode (app uses 'zipCode')
+
+Task API Fields:
+- companyId → companyId
+- name → name
+- description → description
+- dueDate → dueDate
+- status → status
+- completionDate → completionDate
+
+Template API Fields:
+- name → name
+- description → description
+- estimatedDays → estimatedDays
+
+Template Assignment Fields:
+- companyIds → companyIds (array)
+- startDate → startDate
+- dueDate → dueDate
+
+User Profile Variables:
+- email (string)
+- name (string)
+- phone (string)
+- reminderSettings (object)
+  - enabled (boolean)
+  - daysBefore (number: 1,2,3,7,14)
+  - timeOfDay (string: HH:MM)
+- ccEmails (array of strings)
+
+Modal State Variables:
+- show (boolean)
+- type (string: 'success', 'error')
+- message (string)
+
+Local State Variables:
+- user (object)
+- companies (array)
+- tasks (array)
+- taskTemplates (array)
+- modal (object)
