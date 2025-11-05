@@ -10,8 +10,8 @@ import { Building2, MapPin, Phone, Mail, Calendar, Edit, Plus, FileText, ArrowLe
 
 export default function CompanyPage({ companies, tasks, onUpdateCompany, onAddTask, onUpdateTask, onDeleteTask, taskTemplates, onAssignTemplate }) {
   const { id } = useParams()
-  const company = companies.find(c => c.id === parseInt(id))
-  const companyTasks = tasks.filter(t => t.companyId === parseInt(id))
+  const company = companies.find(c => c.id === id)
+  const companyTasks = tasks.filter(t => t.companyId === id)
   
   const [editingCompany, setEditingCompany] = useState(false)
   const [showTaskForm, setShowTaskForm] = useState(false)
@@ -38,7 +38,7 @@ export default function CompanyPage({ companies, tasks, onUpdateCompany, onAddTa
   const handleTaskSubmit = (e) => {
     e.preventDefault()
     if (editingTask) {
-      onUpdateTask(editingTask.id, taskData)
+      onUpdateTask(editingTask.id, company.id, taskData)
       setEditingTask(null)
     } else {
       onAddTask(company.id, taskData)
@@ -608,7 +608,7 @@ export default function CompanyPage({ companies, tasks, onUpdateCompany, onAddTa
                             <Button variant="outline" size="sm" onClick={() => startEditTask(task)}>
                               <Edit className="h-4 w-4" />
                             </Button>
-                            <Button variant="outline" size="sm" onClick={() => onDeleteTask(task.id)}>
+                            <Button variant="outline" size="sm" onClick={() => onDeleteTask(task.id, company.id)}>
                               <Trash2 className="h-4 w-4" />
                             </Button>
                           </div>
