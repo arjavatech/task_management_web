@@ -336,6 +336,7 @@ function AppContent() {
               <CompanyList
                 companies={companies}
                 onAddCompany={addCompany}
+                onUpdateCompany={updateCompany}
                 onDeleteCompany={deleteCompany}
               />
             </Layout>

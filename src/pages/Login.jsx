@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { loginUser, registerUser } from '../firebase/config'
 import { useAuth } from '../contexts/AuthContext'
-import { Building2, Mail, Lock, LogIn, UserPlus, AlertCircle, ArrowRight } from 'lucide-react'
+import { Building2, Mail, Lock, LogIn, UserPlus, AlertCircle, ArrowRight, CheckCircle, Users, Target } from 'lucide-react'
 
 export default function Login() {
   const [isSignUp, setIsSignUp] = useState(false)
@@ -66,134 +66,168 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
-        <Card className="shadow-xl border-0">
-          <CardHeader className="space-y-1 text-center">
-            <div className="mx-auto w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center mb-4">
-              {isSignUp ? (
-                <UserPlus className="w-8 h-8 text-white" />
-              ) : (
-                <LogIn className="w-8 h-8 text-white" />
-              )}
-            </div>
-            <CardTitle className="text-2xl font-bold text-gray-900">
-              {isSignUp ? 'Create Account' : 'Welcome Back'}
-            </CardTitle>
-            <CardDescription className="text-gray-600">
-              {isSignUp
-                ? 'Sign up to manage your company tasks'
-                : 'Sign in to your task management dashboard'}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              {isSignUp && (
-                <div className="space-y-2">
-                  <Label htmlFor="name">Full Name</Label>
-                  <div className="relative">
-                    <UserPlus className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                    <Input
-                      id="name"
-                      type="text"
-                      placeholder="Enter your full name"
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      className="pl-10"
-                      required={isSignUp}
-                    />
-                  </div>
-                </div>
-              )}
-
-              <div className="space-y-2">
-                <Label htmlFor="email">Email Address</Label>
-                <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="Enter your email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="pl-10"
-                    required
-                  />
-                </div>
+    <div className="min-h-screen" style={{
+      backgroundImage: `
+        radial-gradient(circle at 25px 25px, rgba(255,255,255,0.1) 2px, transparent 0),
+        radial-gradient(circle at 75px 75px, rgba(255,255,255,0.1) 2px, transparent 0),
+        linear-gradient(135deg, #1e293b 0%, #0f172a 100%)
+      `,
+      backgroundSize: '100px 100px, 100px 100px, 100% 100%'
+    }}>
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="max-w-7xl w-full flex">
+          {/* LEFT SIDE */}
+          <div className="flex-1 flex flex-col justify-center px-8 lg:px-12">
+            {/* Logo & App Name */}
+            <div className="flex items-center gap-3 mb-16">
+              <div className="w-10 h-10 bg-gradient-to-br from-orange-400 to-orange-600 rounded-lg flex items-center justify-center">
+                <Building2 className="w-6 h-6 text-white" />
               </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                  <Input
-                    id="password"
-                    type="password"
-                    placeholder={isSignUp ? 'Create a password' : 'Enter your password'}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="pl-10"
-                    required
-                  />
-                </div>
-              </div>
-
-              {error && (
-                <div className="flex items-center gap-2 p-3 bg-red-50 border border-red-200 rounded-lg">
-                  <AlertCircle className="w-4 h-4 text-red-500 flex-shrink-0" />
-                  <p className="text-sm text-red-700">{error}</p>
-                </div>
-              )}
-
-              {message && (
-                <div className="flex items-center gap-2 p-3 bg-green-50 border border-green-200 rounded-lg">
-                  <div className="w-4 h-4 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0">
-                    <span className="text-white text-xs">✓</span>
-                  </div>
-                  <p className="text-sm text-green-700">{message}</p>
-                </div>
-              )}
-
-              <Button
-                type="submit"
-                className="w-full bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700"
-                disabled={loading}
-              >
-                {loading ? (
-                  <div className="flex items-center gap-2">
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    {isSignUp ? 'Creating Account...' : 'Signing In...'}
-                  </div>
-                ) : (
-                  <div className="flex items-center gap-2">
-                    {isSignUp ? <UserPlus className="w-4 h-4" /> : <LogIn className="w-4 h-4" />}
-                    {isSignUp ? 'Create Account' : 'Sign In'}
-                  </div>
-                )}
-              </Button>
-            </form>
-
-            <div className="mt-6 text-center">
-              <button
-                type="button"
-                onClick={toggleMode}
-                className="text-sm text-blue-600 hover:text-blue-800 font-medium"
-              >
-                {isSignUp
-                  ? 'Already have an account? Sign in'
-                  : "Don't have an account? Sign up"}
-              </button>
+              <span className="text-2xl font-bold text-white">TaskFlow</span>
             </div>
 
-            {/* Demo Account Info */}
-            <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
-              <p className="text-xs text-blue-700 text-center">
-                <strong>Demo Note:</strong> Create any account to get started.
-                No email verification required for demo purposes.
+            <div className="max-w-lg">
+              {/* Bold Title */}
+              <h1 className="text-5xl lg:text-6xl font-bold text-white mb-6 leading-tight">
+                Streamline Your Task Management
+              </h1>
+              
+              {/* Supporting Paragraph */}
+              <p className="text-xl text-slate-300 mb-12 leading-relaxed">
+                Powerful task management platform designed for modern teams. Organize, track, and complete projects with ease.
               </p>
+
+              {/* Statistics Boxes */}
+              <div className="grid grid-cols-2 gap-6">
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20">
+                  <div className="flex items-center gap-3 mb-2">
+                    <Users className="w-6 h-6 text-orange-400" />
+                    <span className="text-2xl font-bold text-white">500+</span>
+                  </div>
+                  <p className="text-slate-300">Companies Managed</p>
+                </div>
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20">
+                  <div className="flex items-center gap-3 mb-2">
+                    <Target className="w-6 h-6 text-orange-400" />
+                    <span className="text-2xl font-bold text-white">10K+</span>
+                  </div>
+                  <p className="text-slate-300">Tasks Completed</p>
+                </div>
+              </div>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+
+          {/* RIGHT SIDE */}
+          <div className="flex-1 flex items-center justify-center px-8">
+            <div className="w-full max-w-md">
+              <Card className="bg-slate-900 border-slate-800 shadow-2xl rounded-2xl">
+                <CardHeader className="text-center pb-10 pt-10">
+                  <CardTitle className="text-3xl font-bold text-white mb-3">
+                    Welcome Back
+                  </CardTitle>
+                  <CardDescription className="text-slate-400 text-lg">
+                    Sign in to access your dashboard
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="px-10 pb-10">
+                <form onSubmit={handleSubmit} className="space-y-6">
+                  {isSignUp && (
+                    <div className="space-y-2">
+                      <div className="relative">
+                        <UserPlus className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
+                        <Input
+                          id="name"
+                          type="text"
+                          placeholder="Enter your full name"
+                          value={name}
+                          onChange={(e) => setName(e.target.value)}
+                          className="pl-10 bg-slate-800 border-slate-700 text-white placeholder:text-slate-500"
+                          required={isSignUp}
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="space-y-2">
+                    <div className="relative">
+                      <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
+                      <Input
+                        id="email"
+                        type="email"
+                        placeholder="Enter your email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        className="pl-10 bg-slate-800 border-slate-700 text-white placeholder:text-slate-500"
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <div className="relative">
+                      <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
+                      <Input
+                        id="password"
+                        type="password"
+                        placeholder={isSignUp ? 'Create a password' : 'Enter your password'}
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        className="pl-10 bg-slate-800 border-slate-700 text-white placeholder:text-slate-500"
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  {error && (
+                    <div className="flex items-center gap-2 p-3 bg-red-900/50 border border-red-800 rounded-lg">
+                      <AlertCircle className="w-4 h-4 text-red-400 flex-shrink-0" />
+                      <p className="text-sm text-red-300">{error}</p>
+                    </div>
+                  )}
+
+                  {message && (
+                    <div className="flex items-center gap-2 p-3 bg-green-900/50 border border-green-800 rounded-lg">
+                      <CheckCircle className="w-4 h-4 text-green-400 flex-shrink-0" />
+                      <p className="text-sm text-green-300">{message}</p>
+                    </div>
+                  )}
+
+                  <Button
+                    type="submit"
+                    className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-semibold py-3 rounded-lg"
+                    disabled={loading}
+                  >
+                    {loading ? (
+                      <div className="flex items-center gap-2">
+                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                        {isSignUp ? 'Creating Account...' : 'Signing In...'}
+                      </div>
+                    ) : (
+                      <span>{isSignUp ? 'Create Account' : 'Sign In'}</span>
+                    )}
+                  </Button>
+                </form>
+
+                <div className="mt-6 text-center">
+                  <button
+                    type="button"
+                    onClick={toggleMode}
+                    className="text-sm text-orange-400 hover:text-orange-300 font-medium"
+                  >
+                    {isSignUp
+                      ? 'Already have an account? Sign in'
+                      : "Don't have an account? Sign up"}
+                  </button>
+                </div>
+
+                <p className="text-xs text-slate-500 text-center mt-6">
+                  Secure access to your task management portal
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+        </div>
       </div>
     </div>
   )

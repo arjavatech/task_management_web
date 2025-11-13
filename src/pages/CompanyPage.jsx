@@ -17,6 +17,7 @@ export default function CompanyPage({ companies, tasks, onUpdateCompany, onAddTa
   const [showTaskForm, setShowTaskForm] = useState(false)
   const [editingTask, setEditingTask] = useState(null)
   const [searchTerm, setSearchTerm] = useState('')
+  const [showEditModal, setShowEditModal] = useState(false)
   
   const [companyData, setCompanyData] = useState(company || {})
   const [taskData, setTaskData] = useState({
@@ -32,7 +33,7 @@ export default function CompanyPage({ companies, tasks, onUpdateCompany, onAddTa
   const handleCompanySubmit = (e) => {
     e.preventDefault()
     onUpdateCompany(company.id, companyData)
-    setEditingCompany(false)
+    setShowEditModal(false)
   }
 
   const handleTaskSubmit = (e) => {
@@ -386,92 +387,64 @@ export default function CompanyPage({ companies, tasks, onUpdateCompany, onAddTa
                   <Building2 className="h-5 w-5 text-blue-600" />
                   Company Information
                 </CardTitle>
-                <Button variant="outline" size="sm" onClick={() => setEditingCompany(!editingCompany)}>
-                  <Edit className="h-4 w-4 mr-1" />
-                  {editingCompany ? 'Cancel' : 'Edit'}
-                </Button>
+                <div className="flex gap-2">
+                  <Button variant="outline" size="sm" onClick={() => {
+                    console.log('Edit button clicked', company)
+                    console.log('Current showEditModal state:', showEditModal)
+                    setCompanyData(company)
+                    setShowEditModal(true)
+                    console.log('After setting showEditModal to true')
+                  }}>
+                    <Edit className="h-4 w-4" />
+                  </Button>
+                  <Button variant="outline" size="sm" className="text-red-500 hover:text-red-700 hover:bg-red-50 border-red-200">
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
             </CardHeader>
             <CardContent className="p-6">
-              {editingCompany ? (
-                <form onSubmit={handleCompanySubmit} className="space-y-4">
+              <div className="space-y-4">
+                <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
+                  <Building2 className="h-5 w-5 text-blue-600 mt-0.5" />
                   <div>
-                    <Label htmlFor="name">Company Name</Label>
-                    <Input 
-                      id="name" 
-                      value={companyData.name || ''} 
-                      onChange={(e) => setCompanyData({...companyData, name: e.target.value})} 
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="ein">EIN</Label>
-                    <Input 
-                      id="ein" 
-                      value={companyData.ein || ''} 
-                      onChange={(e) => setCompanyData({...companyData, ein: e.target.value})} 
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="contactName">Contact Name</Label>
-                    <Input 
-                      id="contactName" 
-                      value={companyData.contactName || ''} 
-                      onChange={(e) => setCompanyData({...companyData, contactName: e.target.value})} 
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="contactPhone">Contact Phone</Label>
-                    <Input 
-                      id="contactPhone" 
-                      value={companyData.contactPhone || ''} 
-                      onChange={(e) => setCompanyData({...companyData, contactPhone: e.target.value})} 
-                    />
-                  </div>
-                  <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700">Save Changes</Button>
-                </form>
-              ) : (
-                <div className="space-y-4">
-                  <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
-                    <Building2 className="h-5 w-5 text-blue-600 mt-0.5" />
-                    <div>
-                      <p className="font-medium text-gray-900">EIN</p>
-                      <p className="text-gray-600">{company.ein}</p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
-                    <Calendar className="h-5 w-5 text-green-600 mt-0.5" />
-                    <div>
-                      <p className="font-medium text-gray-900">Start Date</p>
-                      <p className="text-gray-600">{new Date(company.startDate).toLocaleDateString()}</p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
-                    <MapPin className="h-5 w-5 text-purple-600 mt-0.5" />
-                    <div>
-                      <p className="font-medium text-gray-900">State Incorporated</p>
-                      <p className="text-gray-600">{company.stateIncorporated}</p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
-                    <Mail className="h-5 w-5 text-indigo-600 mt-0.5" />
-                    <div>
-                      <p className="font-medium text-gray-900">Contact Person</p>
-                      <p className="text-gray-600">{company.contactName}</p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
-                    <Phone className="h-5 w-5 text-green-600 mt-0.5" />
-                    <div>
-                      <p className="font-medium text-gray-900">Phone</p>
-                      <p className="text-gray-600">{company.contactPhone}</p>
-                    </div>
+                    <p className="font-medium text-gray-900">EIN</p>
+                    <p className="text-gray-600">{company.ein}</p>
                   </div>
                 </div>
-              )}
+                
+                <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
+                  <Calendar className="h-5 w-5 text-green-600 mt-0.5" />
+                  <div>
+                    <p className="font-medium text-gray-900">Start Date</p>
+                    <p className="text-gray-600">{new Date(company.startDate).toLocaleDateString()}</p>
+                  </div>
+                </div>
+                
+                <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
+                  <MapPin className="h-5 w-5 text-purple-600 mt-0.5" />
+                  <div>
+                    <p className="font-medium text-gray-900">State Incorporated</p>
+                    <p className="text-gray-600">{company.stateIncorporated}</p>
+                  </div>
+                </div>
+                
+                <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
+                  <Mail className="h-5 w-5 text-indigo-600 mt-0.5" />
+                  <div>
+                    <p className="font-medium text-gray-900">Contact Person</p>
+                    <p className="text-gray-600">{company.contactName}</p>
+                  </div>
+                </div>
+                
+                <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
+                  <Phone className="h-5 w-5 text-green-600 mt-0.5" />
+                  <div>
+                    <p className="font-medium text-gray-900">Phone</p>
+                    <p className="text-gray-600">{company.contactPhone}</p>
+                  </div>
+                </div>
+              </div>
             </CardContent>
           </Card>
         </div>
@@ -623,6 +596,67 @@ export default function CompanyPage({ companies, tasks, onUpdateCompany, onAddTa
           </Card>
         </div>
       </div>
+
+      {/* Edit Company Modal */}
+      {showEditModal && (
+        <div className="fixed inset-0 backdrop-blur-sm bg-white/30 flex items-center justify-center z-50">
+          <Card className="w-full max-w-md mx-4">
+            <CardHeader>
+              <CardTitle>Company Information</CardTitle>
+              <CardDescription>Edit company details</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleCompanySubmit} className="space-y-4">
+                <div>
+                  <Label htmlFor="name">Company Name</Label>
+                  <Input 
+                    id="name" 
+                    value={companyData.name || ''} 
+                    onChange={(e) => setCompanyData({...companyData, name: e.target.value})} 
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="ein">EIN</Label>
+                  <Input 
+                    id="ein" 
+                    value={companyData.ein || ''} 
+                    onChange={(e) => setCompanyData({...companyData, ein: e.target.value})} 
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="contactName">Contact Name</Label>
+                  <Input 
+                    id="contactName" 
+                    value={companyData.contactName || ''} 
+                    onChange={(e) => setCompanyData({...companyData, contactName: e.target.value})} 
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="contactPhone">Contact Phone</Label>
+                  <Input 
+                    id="contactPhone" 
+                    value={companyData.contactPhone || ''} 
+                    onChange={(e) => setCompanyData({...companyData, contactPhone: e.target.value})} 
+                  />
+                </div>
+                <div className="flex gap-3">
+                  <Button 
+                    type="button"
+                    variant="outline" 
+                    onClick={() => setShowEditModal(false)}
+                    className="flex-1"
+                  >
+                    Cancel
+                  </Button>
+                  <Button type="submit" className="flex-1 bg-blue-600 hover:bg-blue-700">
+                    Save Changes
+                  </Button>
+                </div>
+              </form>
+            </CardContent>
+          </Card>
+        </div>
+      )}
     </div>
   )
 }

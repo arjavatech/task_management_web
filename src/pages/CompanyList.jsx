@@ -5,16 +5,20 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Trash2, Building2, MapPin, User, Phone, Eye, Search } from 'lucide-react'
+import { Trash2, Building2, MapPin, User, Phone, Eye, Search, Edit } from 'lucide-react'
 
-export default function CompanyList({ companies, onAddCompany, onDeleteCompany }) {
+export default function CompanyList({ companies, onAddCompany, onDeleteCompany, onUpdateCompany }) {
   const [showForm, setShowForm] = useState(false)
   const [deleteModal, setDeleteModal] = useState({ show: false, company: null })
+  const [editModal, setEditModal] = useState({ show: false, company: null })
   const [showSuccess, setShowSuccess] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
   const [formData, setFormData] = useState({
     name: '', ein: '', startDate: '', stateIncorporated: '', contactName: '',
     contactPhone: '', address1: '', address2: '', city: '', state: '', zipCode: ''
+  })
+  const [editData, setEditData] = useState({
+    name: '', ein: '', contactName: '', contactPhone: ''
   })
 
   const handleSubmit = (e) => {
@@ -29,6 +33,14 @@ export default function CompanyList({ companies, onAddCompany, onDeleteCompany }
 
   const handleChange = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }))
+  }
+
+  const handleEditSubmit = (e) => {
+    e.preventDefault()
+    onUpdateCompany(editModal.company.id, editData)
+    setEditModal({ show: false, company: null })
+    setShowSuccess(true)
+    setTimeout(() => setShowSuccess(false), 3000)
   }
 
   const filteredCompanies = companies.filter(company =>
@@ -130,7 +142,23 @@ export default function CompanyList({ companies, onAddCompany, onDeleteCompany }
             {/* Decorative top border */}
             <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-yellow-500 via-orange-500 to-red-500" />
             
-            {/* Delete button - positioned absolutely */}
+            {/* Edit and Delete buttons - positioned absolutely */}
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => {
+                setEditData({
+                  name: company.name,
+                  ein: company.ein,
+                  contactName: company.contactName,
+                  contactPhone: company.contactPhone
+                })
+                setEditModal({ show: true, company })
+              }}
+              className="absolute top-4 right-16 z-10 text-blue-500 hover:text-blue-700 hover:bg-blue-50 border-blue-200"
+            >
+              <Edit className="h-4 w-4" />
+            </Button>
             <Button 
               variant="outline" 
               size="sm" 
@@ -254,6 +282,71 @@ export default function CompanyList({ companies, onAddCompany, onDeleteCompany }
         </div>
       )}
 
+      {/* Edit Company Modal */}
+      {editModal.show && (
+        <div className="fixed inset-0 backdrop-blur-sm bg-white/30 flex items-center justify-center z-50">
+          <Card className="w-full max-w-md mx-4">
+            <CardHeader>
+              <CardTitle>Company Information</CardTitle>
+              <CardDescription>Edit company details</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleEditSubmit} className="space-y-4">
+                <div>
+                  <Label htmlFor="editName">Company Name</Label>
+                  <Input 
+                    id="editName" 
+                    value={editData.name} 
+                    onChange={(e) => setEditData({...editData, name: e.target.value})} 
+                    required
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="editEin">EIN</Label>
+                  <Input 
+                    id="editEin" 
+                    value={editData.ein} 
+                    onChange={(e) => setEditData({...editData, ein: e.target.value})} 
+                    required
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="editContactName">Contact Name</Label>
+                  <Input 
+                    id="editContactName" 
+                    value={editData.contactName} 
+                    onChange={(e) => setEditData({...editData, contactName: e.target.value})} 
+                    required
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="editContactPhone">Contact Phone</Label>
+                  <Input 
+                    id="editContactPhone" 
+                    value={editData.contactPhone} 
+                    onChange={(e) => setEditData({...editData, contactPhone: e.target.value})} 
+                    required
+                  />
+                </div>
+                <div className="flex gap-3">
+                  <Button 
+                    type="button"
+                    variant="outline" 
+                    onClick={() => setEditModal({ show: false, company: null })}
+                    className="flex-1"
+                  >
+                    Cancel
+                  </Button>
+                  <Button type="submit" className="flex-1 bg-blue-600 hover:bg-blue-700">
+                    Save Changes
+                  </Button>
+                </div>
+              </form>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
       {/* Success Notification */}
       {showSuccess && (
         <div className="fixed top-4 right-4 z-50">
@@ -263,7 +356,7 @@ export default function CompanyList({ companies, onAddCompany, onDeleteCompany }
                 <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
                   <span className="text-white text-sm">✓</span>
                 </div>
-                <p className="text-green-800 font-medium">Company deleted successfully!</p>
+                <p className="text-green-800 font-medium">Company updated successfully!</p>
               </div>
             </CardContent>
           </Card>
