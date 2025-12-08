@@ -9,21 +9,9 @@ import UserProfile from './pages/UserProfile'
 import Layout from './components/Layout'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
 import { logoutUser } from './firebase/config'
-import {
-  getCompanies,
-  createCompany,
-  updateCompany as apiUpdateCompany,
-  deleteCompany as apiDeleteCompany,
-  getTasks,
-  createTask,
-  createTaskTemplate,
-  getTaskTemplates,
-  updateTask as apiUpdateTask,
-  deleteTask as apiDeleteTask,
-  deleteTaskTemplate as apiDeleteTemplate,
-  assignTemplate as apiAssignTemplate,
-  getCurrentUser
-} from './services/firebaseService'
+import { getCompanies, getTasks, getTaskTemplates } from './services/firebaseService'
+import { useCompanies, useTasks, useTemplates } from './hooks'
+import { LoadingSpinner } from './components/common'
 
 function AppContent() {
   const { user, userProfile, loading, updateUserProfile } = useAuth()
@@ -33,17 +21,9 @@ function AppContent() {
   const [modal, setModal] = useState({ show: false, type: '', message: '' })
   const [dataLoading, setDataLoading] = useState(false)
 
-  // Load data when user logs in
-  useEffect(() => {
-    if (user && userProfile) {
-      loadData()
-    } else {
-      // Clear data when user logs out
-      setCompanies([])
-      setTasks([])
-      setTaskTemplates([])
-    }
-  }, [user, userProfile])
+  const showModal = (type, message) => {
+    setModal({ show: true, type, message })
+  }
 
   const loadData = async () => {
     if (!user) return
@@ -92,6 +72,22 @@ function AppContent() {
     }
   }
 
+  const { addCompany, editCompany, removeCompany } = useCompanies(loadData, showModal)
+  const { addTask, editTask, removeTask } = useTasks(loadData, showModal)
+  const { addTemplate, removeTemplate, assignTemplateToCompanies } = useTemplates(loadData, showModal)
+
+  // Load data when user logs in
+  useEffect(() => {
+    if (user && userProfile) {
+      loadData()
+    } else {
+      // Clear data when user logs out
+      setCompanies([])
+      setTasks([])
+      setTaskTemplates([])
+    }
+  }, [user, userProfile])
+
   const logout = async () => {
     try {
       await logoutUser()
@@ -102,183 +98,7 @@ function AppContent() {
     }
   }
 
-  // Company operations
-  const addCompany = async (company) => {
-    try {
-      const result = await createCompany(user.uid, company)
 
-      if (result.success) {
-        await loadData() // Reload data to get the new company
-        setModal({ show: true, type: 'success', message: 'Company added successfully!' })
-        return { success: true, id: result.id }
-      } else {
-        setModal({ show: true, type: 'error', message: result.error || 'Failed to add company' })
-        return { success: false }
-      }
-    } catch (error) {
-      console.error('Error creating company:', error)
-      setModal({ show: true, type: 'error', message: 'Error: Failed to add company' })
-      return { success: false }
-    }
-  }
-
-  const updateCompany = async (id, updatedCompany) => {
-    try {
-      const result = await apiUpdateCompany(user.uid, id, updatedCompany)
-
-      if (result.success) {
-        await loadData() // Reload data to get updated company
-        setModal({ show: true, type: 'success', message: 'Company updated successfully!' })
-        return { success: true }
-      } else {
-        setModal({ show: true, type: 'error', message: result.error || 'Failed to update company' })
-        return { success: false }
-      }
-    } catch (error) {
-      console.error('Error updating company:', error)
-      setModal({ show: true, type: 'error', message: 'Error: Failed to update company' })
-      return { success: false }
-    }
-  }
-
-  const deleteCompany = async (id) => {
-    try {
-      const result = await apiDeleteCompany(user.uid, id)
-
-      if (result.success) {
-        await loadData() // Reload data to reflect deletion
-        setModal({ show: true, type: 'success', message: 'Company deleted successfully!' })
-        return { success: true }
-      } else {
-        setModal({ show: true, type: 'error', message: result.error || 'Failed to delete company' })
-        return { success: false }
-      }
-    } catch (error) {
-      console.error('Error deleting company:', error)
-      setModal({ show: true, type: 'error', message: 'Error: Failed to delete company' })
-      return { success: false }
-    }
-  }
-
-  // Task operations
-  const addTask = async (companyId, task) => {
-    try {
-      const result = await createTask(user.uid, companyId, task)
-
-      if (result.success) {
-        await loadData() // Reload data to get the new task
-        setModal({ show: true, type: 'success', message: 'Task created successfully!' })
-        return { success: true, id: result.id }
-      } else {
-        setModal({ show: true, type: 'error', message: result.error || 'Failed to create task' })
-        return { success: false }
-      }
-    } catch (error) {
-      console.error('Error creating task:', error)
-      setModal({ show: true, type: 'error', message: 'Error: Failed to create task' })
-      return { success: false }
-    }
-  }
-
-  const updateTask = async (id, companyId, updatedTask) => {
-    try {
-      const result = await apiUpdateTask(user.uid, companyId, id, updatedTask)
-
-      if (result.success) {
-        await loadData() // Reload data to get updated task
-        setModal({ show: true, type: 'success', message: 'Task updated successfully!' })
-        return { success: true }
-      } else {
-        setModal({ show: true, type: 'error', message: result.error || 'Failed to update task' })
-        return { success: false }
-      }
-    } catch (error) {
-      console.error('Error updating task:', error)
-      setModal({ show: true, type: 'error', message: 'Error: Failed to update task' })
-      return { success: false }
-    }
-  }
-
-  const deleteTask = async (id, companyId) => {
-    try {
-      const result = await apiDeleteTask(user.uid, companyId, id)
-
-      if (result.success) {
-        await loadData() // Reload data to reflect deletion
-        setModal({ show: true, type: 'success', message: 'Task deleted successfully!' })
-        return { success: true }
-      } else {
-        setModal({ show: true, type: 'error', message: result.error || 'Failed to delete task' })
-        return { success: false }
-      }
-    } catch (error) {
-      console.error('Error deleting task:', error)
-      setModal({ show: true, type: 'error', message: 'Error: Failed to delete task' })
-      return { success: false }
-    }
-  }
-
-  // Template operations
-  const addTaskTemplate = async (template) => {
-    try {
-      const result = await createTaskTemplate(user.uid, template)
-
-      if (result.success) {
-        await loadData() // Reload data to get the new template
-        setModal({ show: true, type: 'success', message: 'Template created successfully!' })
-        return { success: true, id: result.id }
-      } else {
-        setModal({ show: true, type: 'error', message: result.error || 'Failed to create template' })
-        return { success: false }
-      }
-    } catch (error) {
-      console.error('Error creating template:', error)
-      setModal({ show: true, type: 'error', message: 'Error: Failed to create template' })
-      return { success: false }
-    }
-  }
-
-  const assignTemplate = async (templateId, assignData) => {
-    try {
-      const result = await apiAssignTemplate(user.uid, templateId, assignData)
-
-      if (result.success) {
-        await loadData() // Reload data to get new tasks from template assignment
-        setModal({
-          show: true,
-          type: 'success',
-          message: `Template assigned successfully! ${result.tasksCreated || 0} tasks created.`
-        })
-        return { success: true }
-      } else {
-        setModal({ show: true, type: 'error', message: result.error || 'Failed to assign template' })
-        return { success: false }
-      }
-    } catch (error) {
-      console.error('Error assigning template:', error)
-      setModal({ show: true, type: 'error', message: 'Error: Failed to assign template' })
-      return { success: false }
-    }
-  }
-
-  const deleteTemplate = async (id) => {
-    try {
-      const result = await apiDeleteTemplate(user.uid, id)
-
-      if (result.success) {
-        await loadData() // Reload data to reflect deletion
-        setModal({ show: true, type: 'success', message: 'Template deleted successfully!' })
-        return { success: true }
-      } else {
-        setModal({ show: true, type: 'error', message: result.error || 'Failed to delete template' })
-        return { success: false }
-      }
-    } catch (error) {
-      console.error('Error deleting template:', error)
-      setModal({ show: true, type: 'error', message: 'Error: Failed to delete template' })
-      return { success: false }
-    }
-  }
 
   const updateProfile = async (profileData) => {
     const result = await updateUserProfile(profileData)
@@ -292,28 +112,12 @@ function AppContent() {
     return result
   }
 
-  // Show loading screen while checking authentication
   if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading...</p>
-        </div>
-      </div>
-    )
+    return <LoadingSpinner />
   }
 
-  // Show data loading screen
   if (dataLoading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading your data...</p>
-        </div>
-      </div>
-    )
+    return <LoadingSpinner message="Loading your data..." />
   }
 
   return (
@@ -336,8 +140,8 @@ function AppContent() {
               <CompanyList
                 companies={companies}
                 onAddCompany={addCompany}
-                onUpdateCompany={updateCompany}
-                onDeleteCompany={deleteCompany}
+                onUpdateCompany={editCompany}
+                onDeleteCompany={removeCompany}
               />
             </Layout>
           ) : <Navigate to="/login" />
@@ -348,12 +152,12 @@ function AppContent() {
               <CompanyPage
                 companies={companies}
                 tasks={tasks}
-                onUpdateCompany={updateCompany}
+                onUpdateCompany={editCompany}
                 onAddTask={addTask}
-                onUpdateTask={updateTask}
-                onDeleteTask={deleteTask}
+                onUpdateTask={editTask}
+                onDeleteTask={removeTask}
                 taskTemplates={taskTemplates}
-                onAssignTemplate={assignTemplate}
+                onAssignTemplate={assignTemplateToCompanies}
               />
             </Layout>
           ) : <Navigate to="/login" />
@@ -363,9 +167,9 @@ function AppContent() {
             <Layout user={userProfile || user} onLogout={logout}>
               <TaskTemplates
                 taskTemplates={taskTemplates}
-                onAddTemplate={addTaskTemplate}
-                onAssignTemplate={assignTemplate}
-                onDeleteTemplate={deleteTemplate}
+                onAddTemplate={addTemplate}
+                onAssignTemplate={assignTemplateToCompanies}
+                onDeleteTemplate={removeTemplate}
                 companies={companies}
               />
             </Layout>

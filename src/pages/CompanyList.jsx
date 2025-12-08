@@ -2,45 +2,29 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Trash2, Building2, MapPin, User, Phone, Eye, Search, Edit } from 'lucide-react'
+import { Trash2, Building2, MapPin, User, Phone, Eye, Edit } from 'lucide-react'
+import { Modal, ConfirmModal, SearchBar } from '../components/common'
+import { CompanyForm } from '../components/forms'
 
 export default function CompanyList({ companies, onAddCompany, onDeleteCompany, onUpdateCompany }) {
   const [showForm, setShowForm] = useState(false)
   const [deleteModal, setDeleteModal] = useState({ show: false, company: null })
   const [editModal, setEditModal] = useState({ show: false, company: null })
-  const [showSuccess, setShowSuccess] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
-  const [formData, setFormData] = useState({
-    name: '', ein: '', startDate: '', stateIncorporated: '', contactName: '',
-    contactPhone: '', address1: '', address2: '', city: '', state: '', zipCode: ''
-  })
-  const [editData, setEditData] = useState({
-    name: '', ein: '', contactName: '', contactPhone: ''
-  })
 
-  const handleSubmit = (e) => {
-    e.preventDefault()
+  const handleAddCompany = (formData) => {
     onAddCompany(formData)
-    setFormData({
-      name: '', ein: '', startDate: '', stateIncorporated: '', contactName: '',
-      contactPhone: '', address1: '', address2: '', city: '', state: '', zipCode: ''
-    })
     setShowForm(false)
   }
 
-  const handleChange = (field, value) => {
-    setFormData(prev => ({ ...prev, [field]: value }))
+  const handleEditCompany = (formData) => {
+    onUpdateCompany(editModal.company.id, formData)
+    setEditModal({ show: false, company: null })
   }
 
-  const handleEditSubmit = (e) => {
-    e.preventDefault()
-    onUpdateCompany(editModal.company.id, editData)
-    setEditModal({ show: false, company: null })
-    setShowSuccess(true)
-    setTimeout(() => setShowSuccess(false), 3000)
+  const handleDeleteCompany = () => {
+    onDeleteCompany(deleteModal.company.id)
+    setDeleteModal({ show: false, company: null })
   }
 
   const filteredCompanies = companies.filter(company =>
@@ -65,15 +49,11 @@ export default function CompanyList({ companies, onAddCompany, onDeleteCompany, 
 
       {/* Search Bar */}
       <div className="mb-6">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-          <Input
-            placeholder="Search companies by name, EIN, contact, or location..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10"
-          />
-        </div>
+        <SearchBar
+          value={searchTerm}
+          onChange={setSearchTerm}
+          placeholder="Search companies by name, EIN, contact, or location..."
+        />
       </div>
 
       {showForm && (
@@ -83,60 +63,16 @@ export default function CompanyList({ companies, onAddCompany, onDeleteCompany, 
             <CardDescription>Fill in the company details below</CardDescription>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleSubmit} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="name">Company Name</Label>
-                <Input id="name" value={formData.name} onChange={(e) => handleChange('name', e.target.value)} required />
-              </div>
-              <div>
-                <Label htmlFor="ein">EIN</Label>
-                <Input id="ein" value={formData.ein} onChange={(e) => handleChange('ein', e.target.value)} required />
-              </div>
-              <div>
-                <Label htmlFor="startDate">Start Date</Label>
-                <Input id="startDate" type="date" value={formData.startDate} onChange={(e) => handleChange('startDate', e.target.value)} required />
-              </div>
-              <div>
-                <Label htmlFor="stateIncorporated">State Incorporated</Label>
-                <Input id="stateIncorporated" value={formData.stateIncorporated} onChange={(e) => handleChange('stateIncorporated', e.target.value)} required />
-              </div>
-              <div>
-                <Label htmlFor="contactName">Contact Person Name</Label>
-                <Input id="contactName" value={formData.contactName} onChange={(e) => handleChange('contactName', e.target.value)} required />
-              </div>
-              <div>
-                <Label htmlFor="contactPhone">Contact Person Phone</Label>
-                <Input id="contactPhone" value={formData.contactPhone} onChange={(e) => handleChange('contactPhone', e.target.value)} required />
-              </div>
-              <div>
-                <Label htmlFor="address1">Address 1</Label>
-                <Input id="address1" value={formData.address1} onChange={(e) => handleChange('address1', e.target.value)} required />
-              </div>
-              <div>
-                <Label htmlFor="address2">Address 2</Label>
-                <Input id="address2" value={formData.address2} onChange={(e) => handleChange('address2', e.target.value)} />
-              </div>
-              <div>
-                <Label htmlFor="city">City</Label>
-                <Input id="city" value={formData.city} onChange={(e) => handleChange('city', e.target.value)} required />
-              </div>
-              <div>
-                <Label htmlFor="state">State</Label>
-                <Input id="state" value={formData.state} onChange={(e) => handleChange('state', e.target.value)} required />
-              </div>
-              <div>
-                <Label htmlFor="zipCode">Zip Code</Label>
-                <Input id="zipCode" value={formData.zipCode} onChange={(e) => handleChange('zipCode', e.target.value)} required />
-              </div>
-              <div className="sm:col-span-2">
-                <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700">Add Company</Button>
-              </div>
-            </form>
+            <CompanyForm
+              onSubmit={handleAddCompany}
+              onCancel={() => setShowForm(false)}
+              submitText="Add Company"
+            />
           </CardContent>
         </Card>
       )}
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4 lg:gap-6">
         {filteredCompanies.map(company => (
           <Card key={company.id} className="group relative overflow-hidden bg-white hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 border-0 shadow-lg">
             {/* Decorative top border */}
@@ -146,35 +82,27 @@ export default function CompanyList({ companies, onAddCompany, onDeleteCompany, 
             <Button 
               variant="outline" 
               size="sm" 
-              onClick={() => {
-                setEditData({
-                  name: company.name,
-                  ein: company.ein,
-                  contactName: company.contactName,
-                  contactPhone: company.contactPhone
-                })
-                setEditModal({ show: true, company })
-              }}
-              className="absolute top-4 right-16 z-10 text-blue-500 hover:text-blue-700 hover:bg-blue-50 border-blue-200"
+              onClick={() => setEditModal({ show: true, company })}
+              className="absolute top-3 right-14 z-10 text-blue-500 hover:text-blue-700 hover:bg-blue-50 border-blue-200"
             >
-              <Edit className="h-4 w-4" />
+              <Edit className="h-3 w-3" />
             </Button>
             <Button 
               variant="outline" 
               size="sm" 
               onClick={() => setDeleteModal({ show: true, company })}
-              className="absolute top-4 right-4 z-10 text-red-500 hover:text-red-700 hover:bg-red-50 border-red-200"
+              className="absolute top-3 right-3 z-10 text-red-500 hover:text-red-700 hover:bg-red-50 border-red-200"
             >
-              <Trash2 className="h-4 w-4" />
+              <Trash2 className="h-3 w-3" />
             </Button>
             
-            <CardHeader className="pb-4 pr-12 sm:pr-16">
+            <CardHeader className="pb-4 pr-20">
               <div className="flex items-center space-x-3">
                 <div className="w-12 h-12 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-xl flex items-center justify-center shadow-lg">
                   <Building2 className="h-6 w-6 text-white" />
                 </div>
-                <div>
-                  <CardTitle className="text-base lg:text-lg font-bold text-gray-900 group-hover:text-yellow-600 transition-colors truncate">
+                <div className="flex-1 min-w-0">
+                  <CardTitle className="text-base lg:text-lg font-bold text-gray-900 group-hover:text-yellow-600 transition-colors break-words">
                     {company.name}
                   </CardTitle>
                   <CardDescription className="text-sm text-gray-500">
@@ -244,124 +172,33 @@ export default function CompanyList({ companies, onAddCompany, onDeleteCompany, 
       )}
 
       {/* Delete Confirmation Modal */}
-      {deleteModal.show && (
-        <div className="fixed inset-0 backdrop-blur-sm bg-white/30 flex items-center justify-center z-50">
-          <Card className="w-full max-w-md mx-4">
-            <CardHeader>
-              <CardTitle className="text-red-600">Delete Company</CardTitle>
-              <CardDescription>
-                Are you sure you want to delete "{deleteModal.company?.name}"?
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-gray-600 mb-4">
-                This will permanently delete the company and all associated tasks. This action cannot be undone.
-              </p>
-              <div className="flex gap-3">
-                <Button 
-                  variant="outline" 
-                  onClick={() => setDeleteModal({ show: false, company: null })}
-                  className="flex-1"
-                >
-                  Cancel
-                </Button>
-                <Button 
-                  onClick={() => {
-                    onDeleteCompany(deleteModal.company.id)
-                    setDeleteModal({ show: false, company: null })
-                    setShowSuccess(true)
-                    setTimeout(() => setShowSuccess(false), 3000)
-                  }}
-                  className="flex-1 bg-red-600 hover:bg-red-700 text-white"
-                >
-                  Delete
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      )}
+      <ConfirmModal
+        show={deleteModal.show}
+        onClose={() => setDeleteModal({ show: false, company: null })}
+        onConfirm={handleDeleteCompany}
+        title="Delete Company"
+        message={`Are you sure you want to delete "${deleteModal.company?.name}"? This will permanently delete the company and all associated tasks. This action cannot be undone.`}
+        confirmText="Delete"
+        variant="danger"
+      />
 
       {/* Edit Company Modal */}
-      {editModal.show && (
-        <div className="fixed inset-0 backdrop-blur-sm bg-white/30 flex items-center justify-center z-50">
-          <Card className="w-full max-w-md mx-4">
-            <CardHeader>
-              <CardTitle>Company Information</CardTitle>
-              <CardDescription>Edit company details</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <form onSubmit={handleEditSubmit} className="space-y-4">
-                <div>
-                  <Label htmlFor="editName">Company Name</Label>
-                  <Input 
-                    id="editName" 
-                    value={editData.name} 
-                    onChange={(e) => setEditData({...editData, name: e.target.value})} 
-                    required
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="editEin">EIN</Label>
-                  <Input 
-                    id="editEin" 
-                    value={editData.ein} 
-                    onChange={(e) => setEditData({...editData, ein: e.target.value})} 
-                    required
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="editContactName">Contact Name</Label>
-                  <Input 
-                    id="editContactName" 
-                    value={editData.contactName} 
-                    onChange={(e) => setEditData({...editData, contactName: e.target.value})} 
-                    required
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="editContactPhone">Contact Phone</Label>
-                  <Input 
-                    id="editContactPhone" 
-                    value={editData.contactPhone} 
-                    onChange={(e) => setEditData({...editData, contactPhone: e.target.value})} 
-                    required
-                  />
-                </div>
-                <div className="flex gap-3">
-                  <Button 
-                    type="button"
-                    variant="outline" 
-                    onClick={() => setEditModal({ show: false, company: null })}
-                    className="flex-1"
-                  >
-                    Cancel
-                  </Button>
-                  <Button type="submit" className="flex-1 bg-blue-600 hover:bg-blue-700">
-                    Save Changes
-                  </Button>
-                </div>
-              </form>
-            </CardContent>
-          </Card>
-        </div>
-      )}
+      <Modal
+        show={editModal.show}
+        onClose={() => setEditModal({ show: false, company: null })}
+        title="Edit Company"
+        description="Update company details"
+        className="max-w-2xl"
+      >
+        <CompanyForm
+          initialData={editModal.company}
+          onSubmit={handleEditCompany}
+          onCancel={() => setEditModal({ show: false, company: null })}
+          submitText="Save Changes"
+        />
+      </Modal>
 
-      {/* Success Notification */}
-      {showSuccess && (
-        <div className="fixed top-4 right-4 z-50">
-          <Card className="bg-green-50 border-green-200">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-2">
-                <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
-                  <span className="text-white text-sm">✓</span>
-                </div>
-                <p className="text-green-800 font-medium">Company updated successfully!</p>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      )}
+
     </div>
   )
 }

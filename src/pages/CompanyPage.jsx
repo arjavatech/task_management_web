@@ -2,54 +2,45 @@ import { useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { Building2, MapPin, Phone, Mail, Calendar, Edit, Plus, FileText, ArrowLeft, CheckCircle, Clock, AlertCircle, Trash2, BarChart3, Search } from 'lucide-react'
+import { Building2, MapPin, Phone, Mail, Calendar, Edit, Plus, FileText, ArrowLeft, CheckCircle, Clock, AlertCircle, Trash2, BarChart3 } from 'lucide-react'
+import { Modal, SearchBar, StatusBadge } from '../components/common'
+import { CompanyForm, TaskForm } from '../components/forms'
 
 export default function CompanyPage({ companies, tasks, onUpdateCompany, onAddTask, onUpdateTask, onDeleteTask, taskTemplates, onAssignTemplate }) {
   const { id } = useParams()
   const company = companies.find(c => c.id === id)
   const companyTasks = tasks.filter(t => t.companyId === id)
   
-  const [editingCompany, setEditingCompany] = useState(false)
   const [showTaskForm, setShowTaskForm] = useState(false)
   const [editingTask, setEditingTask] = useState(null)
   const [searchTerm, setSearchTerm] = useState('')
   const [showEditModal, setShowEditModal] = useState(false)
-  
-  const [companyData, setCompanyData] = useState(company || {})
-  const [taskData, setTaskData] = useState({
-    name: '', description: '', dueDate: '', status: 'Pending', completionDate: ''
-  })
-  const [filterYear, setFilterYear] = useState(0) // 0 means show all years
-  const [filterMonth, setFilterMonth] = useState(0) // 0 means show all months
+  const [filterYear, setFilterYear] = useState(0)
+  const [filterMonth, setFilterMonth] = useState(0)
 
   if (!company) {
     return <div className="px-4">Company not found</div>
   }
 
-  const handleCompanySubmit = (e) => {
-    e.preventDefault()
-    onUpdateCompany(company.id, companyData)
+  const handleCompanySubmit = (formData) => {
+    onUpdateCompany(company.id, formData)
     setShowEditModal(false)
   }
 
-  const handleTaskSubmit = (e) => {
-    e.preventDefault()
+  const handleTaskSubmit = (formData) => {
     if (editingTask) {
-      onUpdateTask(editingTask.id, company.id, taskData)
+      onUpdateTask(editingTask.id, company.id, formData)
       setEditingTask(null)
     } else {
-      onAddTask(company.id, taskData)
+      onAddTask(company.id, formData)
     }
-    setTaskData({ name: '', description: '', dueDate: '', status: 'Pending', completionDate: '' })
     setShowTaskForm(false)
   }
 
   const startEditTask = (task) => {
-    setTaskData(task)
     setEditingTask(task)
     setShowTaskForm(true)
   }
@@ -388,13 +379,7 @@ export default function CompanyPage({ companies, tasks, onUpdateCompany, onAddTa
                   Company Information
                 </CardTitle>
                 <div className="flex gap-2">
-                  <Button variant="outline" size="sm" onClick={() => {
-                    console.log('Edit button clicked', company)
-                    console.log('Current showEditModal state:', showEditModal)
-                    setCompanyData(company)
-                    setShowEditModal(true)
-                    console.log('After setting showEditModal to true')
-                  }}>
+                  <Button variant="outline" size="sm" onClick={() => setShowEditModal(true)}>
                     <Edit className="h-4 w-4" />
                   </Button>
                   <Button variant="outline" size="sm" className="text-red-500 hover:text-red-700 hover:bg-red-50 border-red-200">
@@ -465,63 +450,26 @@ export default function CompanyPage({ companies, tasks, onUpdateCompany, onAddTa
               </div>
               {/* Search Bar */}
               <div className="mt-4">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                  <Input
-                    placeholder="Search tasks by name, description, or status..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-10"
-                  />
-                </div>
+                <SearchBar
+                  value={searchTerm}
+                  onChange={setSearchTerm}
+                  placeholder="Search tasks by name, description, or status..."
+                />
               </div>
             </CardHeader>
             <CardContent>
               {showTaskForm && (
-                <form onSubmit={handleTaskSubmit} className="space-y-4 mb-6 p-4 bg-gray-50 rounded-lg">
-                  <div>
-                    <Label htmlFor="taskName">Task Name</Label>
-                    <Input 
-                      id="taskName" 
-                      value={taskData.name} 
-                      onChange={(e) => setTaskData({...taskData, name: e.target.value})} 
-                      required 
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="taskDescription">Description</Label>
-                    <Input 
-                      id="taskDescription" 
-                      value={taskData.description} 
-                      onChange={(e) => setTaskData({...taskData, description: e.target.value})} 
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="taskDueDate">Due Date</Label>
-                    <Input 
-                      id="taskDueDate" 
-                      type="date" 
-                      value={taskData.dueDate} 
-                      onChange={(e) => setTaskData({...taskData, dueDate: e.target.value})} 
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="taskStatus">Status</Label>
-                    <Select value={taskData.status} onValueChange={(value) => setTaskData({...taskData, status: value})}>
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Pending">Pending</SelectItem>
-                        <SelectItem value="In Progress">In Progress</SelectItem>
-                        <SelectItem value="Done">Done</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700">
-                    {editingTask ? 'Update Task' : 'Add Task'}
-                  </Button>
-                </form>
+                <div className="mb-6 p-4 bg-gray-50 rounded-lg">
+                  <TaskForm
+                    initialData={editingTask}
+                    onSubmit={handleTaskSubmit}
+                    onCancel={() => {
+                      setShowTaskForm(false)
+                      setEditingTask(null)
+                    }}
+                    submitText={editingTask ? 'Update Task' : 'Add Task'}
+                  />
+                </div>
               )}
 
               {filteredTasks.length === 0 ? (
@@ -555,25 +503,13 @@ export default function CompanyPage({ companies, tasks, onUpdateCompany, onAddTa
                             <p className="font-medium text-sm lg:text-base">{task.name}</p>
                             <p className="text-xs lg:text-sm text-gray-500">{task.description}</p>
                             <div className="sm:hidden mt-2 space-y-1">
-                              <span className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${
-                                task.status === 'Done' ? 'bg-green-100 text-green-800' :
-                                task.status === 'In Progress' ? 'bg-yellow-100 text-yellow-800' :
-                                'bg-gray-100 text-gray-800'
-                              }`}>
-                                {task.status}
-                              </span>
+                              <StatusBadge status={task.status} />
                               <p className="text-xs text-gray-500 md:hidden">{task.dueDate}</p>
                             </div>
                           </div>
                         </TableCell>
                         <TableCell className="hidden sm:table-cell">
-                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                            task.status === 'Done' ? 'bg-green-100 text-green-800' :
-                            task.status === 'In Progress' ? 'bg-yellow-100 text-yellow-800' :
-                            'bg-gray-100 text-gray-800'
-                          }`}>
-                            {task.status}
-                          </span>
+                          <StatusBadge status={task.status} />
                         </TableCell>
                         <TableCell className="hidden md:table-cell">{task.dueDate}</TableCell>
                         <TableCell>
@@ -598,65 +534,20 @@ export default function CompanyPage({ companies, tasks, onUpdateCompany, onAddTa
       </div>
 
       {/* Edit Company Modal */}
-      {showEditModal && (
-        <div className="fixed inset-0 backdrop-blur-sm bg-white/30 flex items-center justify-center z-50">
-          <Card className="w-full max-w-md mx-4">
-            <CardHeader>
-              <CardTitle>Company Information</CardTitle>
-              <CardDescription>Edit company details</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <form onSubmit={handleCompanySubmit} className="space-y-4">
-                <div>
-                  <Label htmlFor="name">Company Name</Label>
-                  <Input 
-                    id="name" 
-                    value={companyData.name || ''} 
-                    onChange={(e) => setCompanyData({...companyData, name: e.target.value})} 
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="ein">EIN</Label>
-                  <Input 
-                    id="ein" 
-                    value={companyData.ein || ''} 
-                    onChange={(e) => setCompanyData({...companyData, ein: e.target.value})} 
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="contactName">Contact Name</Label>
-                  <Input 
-                    id="contactName" 
-                    value={companyData.contactName || ''} 
-                    onChange={(e) => setCompanyData({...companyData, contactName: e.target.value})} 
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="contactPhone">Contact Phone</Label>
-                  <Input 
-                    id="contactPhone" 
-                    value={companyData.contactPhone || ''} 
-                    onChange={(e) => setCompanyData({...companyData, contactPhone: e.target.value})} 
-                  />
-                </div>
-                <div className="flex gap-3">
-                  <Button 
-                    type="button"
-                    variant="outline" 
-                    onClick={() => setShowEditModal(false)}
-                    className="flex-1"
-                  >
-                    Cancel
-                  </Button>
-                  <Button type="submit" className="flex-1 bg-blue-600 hover:bg-blue-700">
-                    Save Changes
-                  </Button>
-                </div>
-              </form>
-            </CardContent>
-          </Card>
-        </div>
-      )}
+      <Modal
+        show={showEditModal}
+        onClose={() => setShowEditModal(false)}
+        title="Edit Company"
+        description="Update company details"
+        className="max-w-2xl"
+      >
+        <CompanyForm
+          initialData={company}
+          onSubmit={handleCompanySubmit}
+          onCancel={() => setShowEditModal(false)}
+          submitText="Save Changes"
+        />
+      </Modal>
     </div>
   )
 }
