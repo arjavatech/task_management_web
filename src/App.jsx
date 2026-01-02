@@ -9,21 +9,10 @@ import UserProfile from './pages/UserProfile'
 import Layout from './components/Layout'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
 import { logoutUser } from './firebase/config'
-import {
-  getCompanies,
-  createCompany,
-  updateCompany as apiUpdateCompany,
-  deleteCompany as apiDeleteCompany,
-  getTasks,
-  createTask,
-  createTaskTemplate,
-  getTaskTemplates,
-  updateTask as apiUpdateTask,
-  deleteTask as apiDeleteTask,
-  deleteTaskTemplate as apiDeleteTemplate,
-  assignTemplate as apiAssignTemplate,
-  getCurrentUser
-} from './services/firebaseService'
+import { getCompanies, getTasks, getTaskTemplates } from './services/firebaseService'
+import { fetchCompanies } from './services/api'
+import { useCompanies, useTasks, useTemplates } from './hooks'
+import { LoadingSpinner } from './components/common'
 
 function AppContent() {
   const { user, userProfile, loading, updateUserProfile } = useAuth()
@@ -33,17 +22,9 @@ function AppContent() {
   const [modal, setModal] = useState({ show: false, type: '', message: '' })
   const [dataLoading, setDataLoading] = useState(false)
 
-  // Load data when user logs in
-  useEffect(() => {
-    if (user && userProfile) {
-      loadData()
-    } else {
-      // Clear data when user logs out
-      setCompanies([])
-      setTasks([])
-      setTaskTemplates([])
-    }
-  }, [user, userProfile])
+  const showModal = (type, message) => {
+    setModal({ show: true, type, message })
+  }
 
   const loadData = async () => {
     if (!user) return
@@ -51,10 +32,10 @@ function AppContent() {
     setDataLoading(true)
     try {
       console.log('Loading data for user:', user.uid)
-
+      
       // Load all data in parallel
       const [companiesResult, tasksResult, templatesResult] = await Promise.all([
-        getCompanies(user.uid),
+        fetchCompanies(),
         getTasks(user.uid),
         getTaskTemplates(user.uid)
       ])
@@ -63,12 +44,12 @@ function AppContent() {
       console.log('Tasks result:', tasksResult)
       console.log('Templates result:', templatesResult)
 
-      if (companiesResult.success) {
-        setCompanies(companiesResult.data || [])
-        console.log('Companies loaded:', companiesResult.data?.length || 0)
+      if (Array.isArray(companiesResult)) {
+        setCompanies(companiesResult)
+        console.log('Companies loaded:', companiesResult.length)
       } else {
-        console.error('Failed to load companies:', companiesResult.error)
-        setModal({ show: true, type: 'error', message: `Failed to load companies: ${companiesResult.error}` })
+        console.error('Failed to load companies:', companiesResult)
+        setModal({ show: true, type: 'error', message: 'Failed to load companies' })
       }
 
       if (tasksResult.success) {
@@ -92,6 +73,22 @@ function AppContent() {
     }
   }
 
+  const { addCompany, editCompany, removeCompany } = useCompanies(loadData, showModal)
+  const { addTask, editTask, removeTask } = useTasks(loadData, showModal)
+  const { addTemplate, removeTemplate, assignTemplateToCompanies } = useTemplates(loadData, showModal)
+
+  // Load data when user logs in
+  useEffect(() => {
+    if (user && userProfile) {
+      loadData()
+    } else {
+      // Clear data when user logs out
+      setCompanies([])
+      setTasks([])
+      setTaskTemplates([])
+    }
+  }, [user, userProfile])
+
   const logout = async () => {
     try {
       await logoutUser()
@@ -102,218 +99,13 @@ function AppContent() {
     }
   }
 
-  // Company operations
-  const addCompany = async (company) => {
-    try {
-      const result = await createCompany(user.uid, company)
-
-      if (result.success) {
-        await loadData() // Reload data to get the new company
-        setModal({ show: true, type: 'success', message: 'Company added successfully!' })
-        return { success: true, id: result.id }
-      } else {
-        setModal({ show: true, type: 'error', message: result.error || 'Failed to add company' })
-        return { success: false }
-      }
-    } catch (error) {
-      console.error('Error creating company:', error)
-      setModal({ show: true, type: 'error', message: 'Error: Failed to add company' })
-      return { success: false }
-    }
-  }
-
-  const updateCompany = async (id, updatedCompany) => {
-    try {
-      const result = await apiUpdateCompany(user.uid, id, updatedCompany)
-
-      if (result.success) {
-        await loadData() // Reload data to get updated company
-        setModal({ show: true, type: 'success', message: 'Company updated successfully!' })
-        return { success: true }
-      } else {
-        setModal({ show: true, type: 'error', message: result.error || 'Failed to update company' })
-        return { success: false }
-      }
-    } catch (error) {
-      console.error('Error updating company:', error)
-      setModal({ show: true, type: 'error', message: 'Error: Failed to update company' })
-      return { success: false }
-    }
-  }
-
-  const deleteCompany = async (id) => {
-    try {
-      const result = await apiDeleteCompany(user.uid, id)
-
-      if (result.success) {
-        await loadData() // Reload data to reflect deletion
-        setModal({ show: true, type: 'success', message: 'Company deleted successfully!' })
-        return { success: true }
-      } else {
-        setModal({ show: true, type: 'error', message: result.error || 'Failed to delete company' })
-        return { success: false }
-      }
-    } catch (error) {
-      console.error('Error deleting company:', error)
-      setModal({ show: true, type: 'error', message: 'Error: Failed to delete company' })
-      return { success: false }
-    }
-  }
-
-  // Task operations
-  const addTask = async (companyId, task) => {
-    try {
-      const result = await createTask(user.uid, companyId, task)
-
-      if (result.success) {
-        await loadData() // Reload data to get the new task
-        setModal({ show: true, type: 'success', message: 'Task created successfully!' })
-        return { success: true, id: result.id }
-      } else {
-        setModal({ show: true, type: 'error', message: result.error || 'Failed to create task' })
-        return { success: false }
-      }
-    } catch (error) {
-      console.error('Error creating task:', error)
-      setModal({ show: true, type: 'error', message: 'Error: Failed to create task' })
-      return { success: false }
-    }
-  }
-
-  const updateTask = async (id, companyId, updatedTask) => {
-    try {
-      const result = await apiUpdateTask(user.uid, companyId, id, updatedTask)
-
-      if (result.success) {
-        await loadData() // Reload data to get updated task
-        setModal({ show: true, type: 'success', message: 'Task updated successfully!' })
-        return { success: true }
-      } else {
-        setModal({ show: true, type: 'error', message: result.error || 'Failed to update task' })
-        return { success: false }
-      }
-    } catch (error) {
-      console.error('Error updating task:', error)
-      setModal({ show: true, type: 'error', message: 'Error: Failed to update task' })
-      return { success: false }
-    }
-  }
-
-  const deleteTask = async (id, companyId) => {
-    try {
-      const result = await apiDeleteTask(user.uid, companyId, id)
-
-      if (result.success) {
-        await loadData() // Reload data to reflect deletion
-        setModal({ show: true, type: 'success', message: 'Task deleted successfully!' })
-        return { success: true }
-      } else {
-        setModal({ show: true, type: 'error', message: result.error || 'Failed to delete task' })
-        return { success: false }
-      }
-    } catch (error) {
-      console.error('Error deleting task:', error)
-      setModal({ show: true, type: 'error', message: 'Error: Failed to delete task' })
-      return { success: false }
-    }
-  }
-
-  // Template operations
-  const addTaskTemplate = async (template) => {
-    try {
-      const result = await createTaskTemplate(user.uid, template)
-
-      if (result.success) {
-        await loadData() // Reload data to get the new template
-        setModal({ show: true, type: 'success', message: 'Template created successfully!' })
-        return { success: true, id: result.id }
-      } else {
-        setModal({ show: true, type: 'error', message: result.error || 'Failed to create template' })
-        return { success: false }
-      }
-    } catch (error) {
-      console.error('Error creating template:', error)
-      setModal({ show: true, type: 'error', message: 'Error: Failed to create template' })
-      return { success: false }
-    }
-  }
-
-  const assignTemplate = async (templateId, assignData) => {
-    try {
-      const result = await apiAssignTemplate(user.uid, templateId, assignData)
-
-      if (result.success) {
-        await loadData() // Reload data to get new tasks from template assignment
-        setModal({
-          show: true,
-          type: 'success',
-          message: `Template assigned successfully! ${result.tasksCreated || 0} tasks created.`
-        })
-        return { success: true }
-      } else {
-        setModal({ show: true, type: 'error', message: result.error || 'Failed to assign template' })
-        return { success: false }
-      }
-    } catch (error) {
-      console.error('Error assigning template:', error)
-      setModal({ show: true, type: 'error', message: 'Error: Failed to assign template' })
-      return { success: false }
-    }
-  }
-
-  const deleteTemplate = async (id) => {
-    try {
-      const result = await apiDeleteTemplate(user.uid, id)
-
-      if (result.success) {
-        await loadData() // Reload data to reflect deletion
-        setModal({ show: true, type: 'success', message: 'Template deleted successfully!' })
-        return { success: true }
-      } else {
-        setModal({ show: true, type: 'error', message: result.error || 'Failed to delete template' })
-        return { success: false }
-      }
-    } catch (error) {
-      console.error('Error deleting template:', error)
-      setModal({ show: true, type: 'error', message: 'Error: Failed to delete template' })
-      return { success: false }
-    }
-  }
-
-  const updateProfile = async (profileData) => {
-    const result = await updateUserProfile(profileData)
-
-    if (result.success) {
-      setModal({ show: true, type: 'success', message: 'Profile updated successfully!' })
-    } else {
-      setModal({ show: true, type: 'error', message: result.error || 'Failed to update profile' })
-    }
-
-    return result
-  }
-
-  // Show loading screen while checking authentication
   if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading...</p>
-        </div>
-      </div>
-    )
+    return <LoadingSpinner />
   }
 
-  // Show data loading screen
-  if (dataLoading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading your data...</p>
-        </div>
-      </div>
-    )
+  // Show loading only on initial load, not on subsequent data loads
+  if (dataLoading && (!companies.length && !tasks.length && !taskTemplates.length)) {
+    return <LoadingSpinner message="Loading your data..." />
   }
 
   return (
@@ -336,8 +128,8 @@ function AppContent() {
               <CompanyList
                 companies={companies}
                 onAddCompany={addCompany}
-                onUpdateCompany={updateCompany}
-                onDeleteCompany={deleteCompany}
+                onUpdateCompany={editCompany}
+                onDeleteCompany={removeCompany}
               />
             </Layout>
           ) : <Navigate to="/login" />
@@ -348,12 +140,12 @@ function AppContent() {
               <CompanyPage
                 companies={companies}
                 tasks={tasks}
-                onUpdateCompany={updateCompany}
+                onUpdateCompany={editCompany}
                 onAddTask={addTask}
-                onUpdateTask={updateTask}
-                onDeleteTask={deleteTask}
+                onUpdateTask={editTask}
+                onDeleteTask={removeTask}
                 taskTemplates={taskTemplates}
-                onAssignTemplate={assignTemplate}
+                onAssignTemplate={assignTemplateToCompanies}
               />
             </Layout>
           ) : <Navigate to="/login" />
@@ -363,10 +155,11 @@ function AppContent() {
             <Layout user={userProfile || user} onLogout={logout}>
               <TaskTemplates
                 taskTemplates={taskTemplates}
-                onAddTemplate={addTaskTemplate}
-                onAssignTemplate={assignTemplate}
-                onDeleteTemplate={deleteTemplate}
+                onAddTemplate={addTemplate}
+                onAssignTemplate={assignTemplateToCompanies}
+                onDeleteTemplate={removeTemplate}
                 companies={companies}
+                tasks={tasks}
               />
             </Layout>
           ) : <Navigate to="/login" />
@@ -374,10 +167,7 @@ function AppContent() {
         <Route path="/profile" element={
           user ? (
             <Layout user={userProfile || user} onLogout={logout}>
-              <UserProfile
-                user={userProfile || user}
-                onUpdateProfile={updateProfile}
-              />
+              <UserProfile />
             </Layout>
           ) : <Navigate to="/login" />
         } />
@@ -404,7 +194,7 @@ function AppContent() {
             <p className="text-gray-600 mb-6">{modal.message}</p>
             <button
               onClick={() => setModal({ show: false, type: '', message: '' })}
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors cursor-pointer"
             >
               OK
             </button>

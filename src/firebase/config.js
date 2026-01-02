@@ -24,24 +24,73 @@ export const db = getFirestore(app)
 export const loginUser = async (email, password) => {
   try {
     const userCredential = await signInWithEmailAndPassword(auth, email, password)
+    const token = await userCredential.user.getIdToken()
+    localStorage.setItem('authToken', token)
     return { success: true, user: userCredential.user }
   } catch (error) {
-    return { success: false, error: error.message }
+    let errorMessage = 'Login failed. Please try again.'
+    
+    switch (error.code) {
+      case 'auth/user-not-found':
+        errorMessage = 'No account found with this email address.'
+        break
+      case 'auth/wrong-password':
+        errorMessage = 'Incorrect password. Please try again.'
+        break
+      case 'auth/invalid-email':
+        errorMessage = 'Please enter a valid email address.'
+        break
+      case 'auth/user-disabled':
+        errorMessage = 'This account has been disabled.'
+        break
+      case 'auth/too-many-requests':
+        errorMessage = 'Too many failed attempts. Please try again later.'
+        break
+      case 'auth/invalid-credential':
+        errorMessage = 'Invalid email or password. Please check your credentials.'
+        break
+      default:
+        errorMessage = error.message
+    }
+    
+    return { success: false, error: errorMessage }
   }
 }
 
 export const registerUser = async (email, password) => {
   try {
     const userCredential = await createUserWithEmailAndPassword(auth, email, password)
+    const token = await userCredential.user.getIdToken()
+    localStorage.setItem('authToken', token)
     return { success: true, user: userCredential.user }
   } catch (error) {
-    return { success: false, error: error.message }
+    let errorMessage = 'Registration failed. Please try again.'
+    
+    switch (error.code) {
+      case 'auth/email-already-in-use':
+        errorMessage = 'An account with this email already exists.'
+        break
+      case 'auth/weak-password':
+        errorMessage = 'Password should be at least 6 characters long.'
+        break
+      case 'auth/invalid-email':
+        errorMessage = 'Please enter a valid email address.'
+        break
+      case 'auth/operation-not-allowed':
+        errorMessage = 'Email/password accounts are not enabled.'
+        break
+      default:
+        errorMessage = error.message
+    }
+    
+    return { success: false, error: errorMessage }
   }
 }
 
 export const logoutUser = async () => {
   try {
     await signOut(auth)
+    localStorage.removeItem('authToken')
     return { success: true }
   } catch (error) {
     return { success: false, error: error.message }

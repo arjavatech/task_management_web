@@ -1,57 +1,61 @@
 import { useState } from 'react'
-import { useParams, Link } from 'react-router-dom'
+import { useParams, useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { Building2, MapPin, Phone, Mail, Calendar, Edit, Plus, FileText, ArrowLeft, CheckCircle, Clock, AlertCircle, Trash2, BarChart3, Search } from 'lucide-react'
+import { Building2, MapPin, Phone, Mail, Calendar, Edit, Plus, FileText, ArrowLeft, CheckCircle, Clock, AlertCircle, Trash2, BarChart3 } from 'lucide-react'
+import { Modal, SearchBar, StatusBadge, ConfirmModal } from '../components/common'
+import { CompanyForm, TaskForm } from '../components/forms'
 
 export default function CompanyPage({ companies, tasks, onUpdateCompany, onAddTask, onUpdateTask, onDeleteTask, taskTemplates, onAssignTemplate }) {
   const { id } = useParams()
+  const navigate = useNavigate()
   const company = companies.find(c => c.id === id)
   const companyTasks = tasks.filter(t => t.companyId === id)
   
-  const [editingCompany, setEditingCompany] = useState(false)
   const [showTaskForm, setShowTaskForm] = useState(false)
   const [editingTask, setEditingTask] = useState(null)
   const [searchTerm, setSearchTerm] = useState('')
   const [showEditModal, setShowEditModal] = useState(false)
-  
-  const [companyData, setCompanyData] = useState(company || {})
-  const [taskData, setTaskData] = useState({
-    name: '', description: '', dueDate: '', status: 'Pending', completionDate: ''
-  })
-  const [filterYear, setFilterYear] = useState(0) // 0 means show all years
-  const [filterMonth, setFilterMonth] = useState(0) // 0 means show all months
+  const [filterYear, setFilterYear] = useState(0)
+  const [filterMonth, setFilterMonth] = useState(0)
+  const [isUpdating, setIsUpdating] = useState(false)
+  const [deleteModal, setDeleteModal] = useState({ show: false, task: null })
 
   if (!company) {
     return <div className="px-4">Company not found</div>
   }
 
-  const handleCompanySubmit = (e) => {
-    e.preventDefault()
-    onUpdateCompany(company.id, companyData)
-    setShowEditModal(false)
+  const handleCompanySubmit = async (formData) => {
+    setIsUpdating(true)
+    try {
+      await onUpdateCompany(company.id, formData)
+      setShowEditModal(false)
+    } finally {
+      setIsUpdating(false)
+    }
   }
 
-  const handleTaskSubmit = (e) => {
-    e.preventDefault()
+  const handleTaskSubmit = (formData) => {
     if (editingTask) {
-      onUpdateTask(editingTask.id, company.id, taskData)
+      onUpdateTask(editingTask.id, company.id, formData)
       setEditingTask(null)
     } else {
-      onAddTask(company.id, taskData)
+      onAddTask(company.id, formData)
     }
-    setTaskData({ name: '', description: '', dueDate: '', status: 'Pending', completionDate: '' })
     setShowTaskForm(false)
   }
 
   const startEditTask = (task) => {
-    setTaskData(task)
     setEditingTask(task)
     setShowTaskForm(true)
+  }
+
+  const handleDeleteTask = () => {
+    onDeleteTask(deleteModal.task.id, company.id)
+    setDeleteModal({ show: false, task: null })
   }
 
   const filteredTasks = companyTasks.filter(task =>
@@ -65,12 +69,10 @@ export default function CompanyPage({ companies, tasks, onUpdateCompany, onAddTa
       {/* Header */}
       <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
         <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-4 sm:space-y-0 sm:space-x-4">
-          <Link to="/companies">
-            <Button variant="outline" size="sm">
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Companies
-            </Button>
-          </Link>
+          <Button variant="outline" size="sm" onClick={() => navigate(-1)}>
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back
+          </Button>
           <div>
             <h1 className="text-2xl lg:text-4xl font-bold text-gray-900 flex items-center gap-3">
               <Building2 className="h-6 lg:h-8 w-6 lg:w-8 text-blue-600" />
@@ -82,56 +84,56 @@ export default function CompanyPage({ companies, tasks, onUpdateCompany, onAddTa
       </div>
 
       {/* Company Overview Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
         <Card className="border-l-4 border-l-blue-500">
-          <CardContent className="p-6">
+          <CardContent className="p-3 sm:p-4 lg:p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Total Tasks</p>
-                <p className="text-3xl font-bold text-gray-900">{companyTasks.length}</p>
+                <p className="text-xs sm:text-sm font-medium text-gray-600">Total Tasks</p>
+                <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">{companyTasks.length}</p>
               </div>
-              <FileText className="h-8 w-8 text-blue-500" />
+              <FileText className="h-6 w-6 sm:h-7 sm:w-7 lg:h-8 lg:w-8 text-blue-500" />
             </div>
           </CardContent>
         </Card>
 
         <Card className="border-l-4 border-l-green-500">
-          <CardContent className="p-6">
+          <CardContent className="p-3 sm:p-4 lg:p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Completed</p>
-                <p className="text-3xl font-bold text-gray-900">{companyTasks.filter(t => t.status === 'Done').length}</p>
+                <p className="text-xs sm:text-sm font-medium text-gray-600">Completed</p>
+                <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">{companyTasks.filter(t => t.status === 'Done').length}</p>
               </div>
-              <CheckCircle className="h-8 w-8 text-green-500" />
+              <CheckCircle className="h-6 w-6 sm:h-7 sm:w-7 lg:h-8 lg:w-8 text-green-500" />
             </div>
           </CardContent>
         </Card>
 
         <Card className="border-l-4 border-l-yellow-500">
-          <CardContent className="p-6">
+          <CardContent className="p-3 sm:p-4 lg:p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">In Progress</p>
-                <p className="text-3xl font-bold text-gray-900">{companyTasks.filter(t => t.status === 'In Progress').length}</p>
+                <p className="text-xs sm:text-sm font-medium text-gray-600">In Progress</p>
+                <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">{companyTasks.filter(t => t.status === 'In Progress').length}</p>
               </div>
-              <Clock className="h-8 w-8 text-yellow-500" />
+              <Clock className="h-6 w-6 sm:h-7 sm:w-7 lg:h-8 lg:w-8 text-yellow-500" />
             </div>
           </CardContent>
         </Card>
 
         <Card className="border-l-4 border-l-red-500">
-          <CardContent className="p-6">
+          <CardContent className="p-3 sm:p-4 lg:p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Overdue</p>
-                <p className="text-3xl font-bold text-gray-900">
+                <p className="text-xs sm:text-sm font-medium text-gray-600">Overdue</p>
+                <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">
                   {companyTasks.filter(t => {
                     if (!t.dueDate || t.status === 'Done') return false
                     return new Date(t.dueDate) < new Date()
                   }).length || 0}
                 </p>
               </div>
-              <AlertCircle className="h-8 w-8 text-red-500" />
+              <AlertCircle className="h-6 w-6 sm:h-7 sm:w-7 lg:h-8 lg:w-8 text-red-500" />
             </div>
           </CardContent>
         </Card>
@@ -200,18 +202,18 @@ export default function CompanyPage({ companies, tasks, onUpdateCompany, onAddTa
       </Card>
 
       {/* Modern Charts */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 lg:gap-8">
         {/* Weekly Task Trend Chart */}
         <Card className="shadow-lg">
           <CardHeader>
-            <CardTitle className="text-xl flex items-center gap-2">
-              <BarChart3 className="h-5 w-5 text-blue-600" />
-              Weekly Task Trend
+            <CardTitle className="text-lg sm:text-xl flex items-center gap-2">
+              <BarChart3 className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600" />
+              <span className="text-sm sm:text-xl">Weekly Task Trend</span>
             </CardTitle>
-            <CardDescription>Weekly task completion progress</CardDescription>
+            <CardDescription className="text-xs sm:text-sm">Weekly task completion progress</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="relative h-64">
+            <div className="relative h-48 sm:h-64">
               <div className="absolute left-0 top-0 h-full flex flex-col justify-between text-xs text-gray-400 pr-2">
                 <span>10</span>
                 <span>8</span>
@@ -235,7 +237,8 @@ export default function CompanyPage({ companies, tasks, onUpdateCompany, onAddTa
                   
                   // Get current week
                   const today = new Date()
-                  const startOfWeek = new Date(today.setDate(today.getDate() - today.getDay()))
+                  const startOfWeek = new Date(today)
+                  startOfWeek.setDate(today.getDate() - today.getDay())
                   
                   return ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day, index) => {
                     const dayDate = new Date(startOfWeek)
@@ -276,14 +279,14 @@ export default function CompanyPage({ companies, tasks, onUpdateCompany, onAddTa
         {/* Task Status Line Chart */}
         <Card className="shadow-lg">
           <CardHeader>
-            <CardTitle className="text-xl flex items-center gap-2">
-              <BarChart3 className="h-5 w-5 text-blue-600" />
-              Task Status Trend
+            <CardTitle className="text-lg sm:text-xl flex items-center gap-2">
+              <BarChart3 className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600" />
+              <span className="text-sm sm:text-xl">Task Status Trend</span>
             </CardTitle>
-            <CardDescription>Cumulative completed tasks over time</CardDescription>
+            <CardDescription className="text-xs sm:text-sm">Cumulative completed tasks over time</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="relative h-64">
+            <div className="relative h-48 sm:h-64">
               <div className="absolute left-0 top-0 h-full flex flex-col justify-between text-xs text-gray-400 pr-2">
                 <span>20</span>
                 <span>15</span>
@@ -306,7 +309,8 @@ export default function CompanyPage({ companies, tasks, onUpdateCompany, onAddTa
                   
                   // Get current week
                   const today = new Date()
-                  const startOfWeek = new Date(today.setDate(today.getDate() - today.getDay()))
+                  const startOfWeek = new Date(today)
+                  startOfWeek.setDate(today.getDate() - today.getDay())
                   const completedTasks = filteredTasks.filter(t => t.status === 'Done').length
                   const maxCompleted = Math.max(completedTasks, 20)
                   
@@ -377,39 +381,33 @@ export default function CompanyPage({ companies, tasks, onUpdateCompany, onAddTa
         </Card>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 lg:gap-8">
         {/* Company Information */}
-        <div className="lg:col-span-1">
+        <div className="xl:col-span-1">
           <Card className="h-fit">
             <CardHeader>
-              <div className="flex justify-between items-center">
-                <CardTitle className="text-xl flex items-center gap-2">
-                  <Building2 className="h-5 w-5 text-blue-600" />
-                  Company Information
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                <CardTitle className="text-lg sm:text-xl flex items-center gap-2">
+                  <Building2 className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600" />
+                  <span className="text-sm sm:text-xl">Company Information</span>
                 </CardTitle>
                 <div className="flex gap-2">
-                  <Button variant="outline" size="sm" onClick={() => {
-                    console.log('Edit button clicked', company)
-                    console.log('Current showEditModal state:', showEditModal)
-                    setCompanyData(company)
-                    setShowEditModal(true)
-                    console.log('After setting showEditModal to true')
-                  }}>
-                    <Edit className="h-4 w-4" />
+                  <Button variant="outline" size="sm" onClick={() => setShowEditModal(true)}>
+                    <Edit className="h-3 w-3 sm:h-4 sm:w-4" />
                   </Button>
                   <Button variant="outline" size="sm" className="text-red-500 hover:text-red-700 hover:bg-red-50 border-red-200">
-                    <Trash2 className="h-4 w-4" />
+                    <Trash2 className="h-3 w-3 sm:h-4 sm:w-4" />
                   </Button>
                 </div>
               </div>
             </CardHeader>
-            <CardContent className="p-6">
-              <div className="space-y-4">
-                <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
-                  <Building2 className="h-5 w-5 text-blue-600 mt-0.5" />
-                  <div>
-                    <p className="font-medium text-gray-900">EIN</p>
-                    <p className="text-gray-600">{company.ein}</p>
+            <CardContent className="p-4 sm:p-6">
+              <div className="space-y-3 sm:space-y-4">
+                <div className="flex items-start gap-2 sm:gap-3 p-2 sm:p-3 bg-gray-50 rounded-lg">
+                  <Building2 className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600 mt-0.5 flex-shrink-0" />
+                  <div className="min-w-0">
+                    <p className="font-medium text-gray-900 text-sm sm:text-base">EIN</p>
+                    <p className="text-gray-600 text-xs sm:text-sm break-all">{company.EIN || company.ein || 'Not provided'}</p>
                   </div>
                 </div>
                 
@@ -417,7 +415,9 @@ export default function CompanyPage({ companies, tasks, onUpdateCompany, onAddTa
                   <Calendar className="h-5 w-5 text-green-600 mt-0.5" />
                   <div>
                     <p className="font-medium text-gray-900">Start Date</p>
-                    <p className="text-gray-600">{new Date(company.startDate).toLocaleDateString()}</p>
+                    <p className="text-gray-600">
+                      {company.startDate ? new Date(company.startDate).toLocaleDateString() : 'Not provided'}
+                    </p>
                   </div>
                 </div>
                 
@@ -425,7 +425,7 @@ export default function CompanyPage({ companies, tasks, onUpdateCompany, onAddTa
                   <MapPin className="h-5 w-5 text-purple-600 mt-0.5" />
                   <div>
                     <p className="font-medium text-gray-900">State Incorporated</p>
-                    <p className="text-gray-600">{company.stateIncorporated}</p>
+                    <p className="text-gray-600">{company.stateIncorporated || 'Not provided'}</p>
                   </div>
                 </div>
                 
@@ -433,7 +433,7 @@ export default function CompanyPage({ companies, tasks, onUpdateCompany, onAddTa
                   <Mail className="h-5 w-5 text-indigo-600 mt-0.5" />
                   <div>
                     <p className="font-medium text-gray-900">Contact Person</p>
-                    <p className="text-gray-600">{company.contactName}</p>
+                    <p className="text-gray-600">{company.contactPersonName || company.contactName || 'Not provided'}</p>
                   </div>
                 </div>
                 
@@ -441,7 +441,20 @@ export default function CompanyPage({ companies, tasks, onUpdateCompany, onAddTa
                   <Phone className="h-5 w-5 text-green-600 mt-0.5" />
                   <div>
                     <p className="font-medium text-gray-900">Phone</p>
-                    <p className="text-gray-600">{company.contactPhone}</p>
+                    <p className="text-gray-600">{company.contactPersonPhNumber || company.contactPhone || 'Not provided'}</p>
+                  </div>
+                </div>
+                
+                <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
+                  <MapPin className="h-5 w-5 text-blue-600 mt-0.5" />
+                  <div>
+                    <p className="font-medium text-gray-900">Address</p>
+                    <p className="text-gray-600">
+                      {company.address1 || 'Not provided'}
+                      {company.address2 && <><br />{company.address2}</>}
+                      <br />
+                      {company.city || 'N/A'}, {company.state || 'N/A'} {company.zipCode || company.zip || 'N/A'}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -450,78 +463,41 @@ export default function CompanyPage({ companies, tasks, onUpdateCompany, onAddTa
         </div>
 
         {/* Tasks Section */}
-        <div className="lg:col-span-2">
+        <div className="xl:col-span-2">
           <Card>
             <CardHeader>
-              <div className="flex justify-between items-center">
-                <CardTitle className="text-xl flex items-center gap-2">
-                  <FileText className="h-5 w-5 text-blue-600" />
-                  Tasks ({filteredTasks.length})
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                <CardTitle className="text-lg sm:text-xl flex items-center gap-2">
+                  <FileText className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600" />
+                  <span className="text-sm sm:text-xl">Tasks ({filteredTasks.length})</span>
                 </CardTitle>
-                <Button onClick={() => setShowTaskForm(!showTaskForm)} size="sm" className="bg-blue-600 hover:bg-blue-700">
-                  <Plus className="h-4 w-4 mr-1" />
+                <Button onClick={() => setShowTaskForm(!showTaskForm)} size="sm" className="bg-blue-600 hover:bg-blue-700 w-full sm:w-auto">
+                  <Plus className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
                   {showTaskForm ? 'Cancel' : 'Add Task'}
                 </Button>
               </div>
               {/* Search Bar */}
               <div className="mt-4">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                  <Input
-                    placeholder="Search tasks by name, description, or status..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-10"
-                  />
-                </div>
+                <SearchBar
+                  value={searchTerm}
+                  onChange={setSearchTerm}
+                  placeholder="Search tasks by name, description, or status..."
+                />
               </div>
             </CardHeader>
             <CardContent>
               {showTaskForm && (
-                <form onSubmit={handleTaskSubmit} className="space-y-4 mb-6 p-4 bg-gray-50 rounded-lg">
-                  <div>
-                    <Label htmlFor="taskName">Task Name</Label>
-                    <Input 
-                      id="taskName" 
-                      value={taskData.name} 
-                      onChange={(e) => setTaskData({...taskData, name: e.target.value})} 
-                      required 
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="taskDescription">Description</Label>
-                    <Input 
-                      id="taskDescription" 
-                      value={taskData.description} 
-                      onChange={(e) => setTaskData({...taskData, description: e.target.value})} 
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="taskDueDate">Due Date</Label>
-                    <Input 
-                      id="taskDueDate" 
-                      type="date" 
-                      value={taskData.dueDate} 
-                      onChange={(e) => setTaskData({...taskData, dueDate: e.target.value})} 
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="taskStatus">Status</Label>
-                    <Select value={taskData.status} onValueChange={(value) => setTaskData({...taskData, status: value})}>
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Pending">Pending</SelectItem>
-                        <SelectItem value="In Progress">In Progress</SelectItem>
-                        <SelectItem value="Done">Done</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700">
-                    {editingTask ? 'Update Task' : 'Add Task'}
-                  </Button>
-                </form>
+                <div className="mb-6 p-4 bg-gray-50 rounded-lg">
+                  <TaskForm
+                    initialData={editingTask}
+                    onSubmit={handleTaskSubmit}
+                    onCancel={() => {
+                      setShowTaskForm(false)
+                      setEditingTask(null)
+                    }}
+                    submitText={editingTask ? 'Update Task' : 'Add Task'}
+                  />
+                </div>
               )}
 
               {filteredTasks.length === 0 ? (
@@ -538,13 +514,13 @@ export default function CompanyPage({ companies, tasks, onUpdateCompany, onAddTa
                 </div>
               ) : (
                 <div className="overflow-x-auto">
-                  <Table>
+                  <Table className="min-w-full">
                     <TableHeader>
                       <TableRow>
-                        <TableHead>Task Name</TableHead>
-                        <TableHead className="hidden sm:table-cell">Status</TableHead>
-                        <TableHead className="hidden md:table-cell">Due Date</TableHead>
-                        <TableHead>Actions</TableHead>
+                        <TableHead className="min-w-[200px]">Task Name</TableHead>
+                        <TableHead className="min-w-[120px]">Status</TableHead>
+                        <TableHead className="min-w-[120px]">Due Date</TableHead>
+                        <TableHead className="min-w-[150px]">Actions</TableHead>
                       </TableRow>
                     </TableHeader>
                   <TableBody>
@@ -554,34 +530,18 @@ export default function CompanyPage({ companies, tasks, onUpdateCompany, onAddTa
                           <div>
                             <p className="font-medium text-sm lg:text-base">{task.name}</p>
                             <p className="text-xs lg:text-sm text-gray-500">{task.description}</p>
-                            <div className="sm:hidden mt-2 space-y-1">
-                              <span className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${
-                                task.status === 'Done' ? 'bg-green-100 text-green-800' :
-                                task.status === 'In Progress' ? 'bg-yellow-100 text-yellow-800' :
-                                'bg-gray-100 text-gray-800'
-                              }`}>
-                                {task.status}
-                              </span>
-                              <p className="text-xs text-gray-500 md:hidden">{task.dueDate}</p>
-                            </div>
                           </div>
                         </TableCell>
-                        <TableCell className="hidden sm:table-cell">
-                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                            task.status === 'Done' ? 'bg-green-100 text-green-800' :
-                            task.status === 'In Progress' ? 'bg-yellow-100 text-yellow-800' :
-                            'bg-gray-100 text-gray-800'
-                          }`}>
-                            {task.status}
-                          </span>
-                        </TableCell>
-                        <TableCell className="hidden md:table-cell">{task.dueDate}</TableCell>
                         <TableCell>
-                          <div className="flex flex-col sm:flex-row gap-1 sm:gap-2">
+                          <StatusBadge status={task.status} />
+                        </TableCell>
+                        <TableCell>{task.dueDate}</TableCell>
+                        <TableCell>
+                          <div className="flex gap-2">
                             <Button variant="outline" size="sm" onClick={() => startEditTask(task)}>
                               <Edit className="h-4 w-4" />
                             </Button>
-                            <Button variant="outline" size="sm" onClick={() => onDeleteTask(task.id, company.id)}>
+                            <Button variant="outline" size="sm" onClick={() => setDeleteModal({ show: true, task })}>
                               <Trash2 className="h-4 w-4" />
                             </Button>
                           </div>
@@ -598,65 +558,40 @@ export default function CompanyPage({ companies, tasks, onUpdateCompany, onAddTa
       </div>
 
       {/* Edit Company Modal */}
-      {showEditModal && (
-        <div className="fixed inset-0 backdrop-blur-sm bg-white/30 flex items-center justify-center z-50">
-          <Card className="w-full max-w-md mx-4">
-            <CardHeader>
-              <CardTitle>Company Information</CardTitle>
-              <CardDescription>Edit company details</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <form onSubmit={handleCompanySubmit} className="space-y-4">
-                <div>
-                  <Label htmlFor="name">Company Name</Label>
-                  <Input 
-                    id="name" 
-                    value={companyData.name || ''} 
-                    onChange={(e) => setCompanyData({...companyData, name: e.target.value})} 
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="ein">EIN</Label>
-                  <Input 
-                    id="ein" 
-                    value={companyData.ein || ''} 
-                    onChange={(e) => setCompanyData({...companyData, ein: e.target.value})} 
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="contactName">Contact Name</Label>
-                  <Input 
-                    id="contactName" 
-                    value={companyData.contactName || ''} 
-                    onChange={(e) => setCompanyData({...companyData, contactName: e.target.value})} 
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="contactPhone">Contact Phone</Label>
-                  <Input 
-                    id="contactPhone" 
-                    value={companyData.contactPhone || ''} 
-                    onChange={(e) => setCompanyData({...companyData, contactPhone: e.target.value})} 
-                  />
-                </div>
-                <div className="flex gap-3">
-                  <Button 
-                    type="button"
-                    variant="outline" 
-                    onClick={() => setShowEditModal(false)}
-                    className="flex-1"
-                  >
-                    Cancel
-                  </Button>
-                  <Button type="submit" className="flex-1 bg-blue-600 hover:bg-blue-700">
-                    Save Changes
-                  </Button>
-                </div>
-              </form>
-            </CardContent>
-          </Card>
-        </div>
-      )}
+      <Modal
+        show={showEditModal}
+        onClose={() => !isUpdating && setShowEditModal(false)}
+        title="Edit Company"
+        description="Update company details"
+        className="max-w-4xl"
+      >
+        {isUpdating && (
+          <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
+              <p className="text-blue-800 font-medium">Updating company...</p>
+            </div>
+          </div>
+        )}
+        <CompanyForm
+          initialData={company}
+          onSubmit={handleCompanySubmit}
+          onCancel={() => !isUpdating && setShowEditModal(false)}
+          submitText="Save Changes"
+        />
+      </Modal>
+
+      {/* Delete Task Confirmation Modal */}
+      <ConfirmModal
+        show={deleteModal.show}
+        onClose={() => setDeleteModal({ show: false, task: null })}
+        onConfirm={handleDeleteTask}
+        title="Delete Task"
+        message={`Are you sure you want to delete the task "${deleteModal.task?.name}"? This action cannot be undone.`}
+        confirmText="OK"
+        cancelText="Cancel"
+        variant="danger"
+      />
     </div>
   )
 }

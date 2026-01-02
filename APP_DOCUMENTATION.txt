@@ -1,0 +1,94 @@
+# Company Task Management App Documentation
+
+## Overview
+A React-based web application for managing companies and their associated tasks. Built with Firebase for authentication and data storage, featuring a modern UI with Tailwind CSS.
+
+## Features
+- User Authentication (Login/Register)
+- Company Management (CRUD operations)
+- Task Management per company
+- Task Templates for reusable task creation
+- User Profile Management
+- Dashboard with analytics
+- Responsive design
+
+## Tech Stack
+- Frontend: React 19, Vite
+- Styling: Tailwind CSS, Radix UI components
+- Backend: Firebase (Auth + Firestore)
+- Routing: React Router DOM
+- Icons: Lucide React
+
+## Project Structure
+```
+src/
+├── components/
+│   ├── common/          # Reusable UI components
+│   ├── forms/           # Form components
+│   └── ui/              # Base UI components
+├── contexts/            # React contexts
+├── firebase/            # Firebase configuration
+├── hooks/               # Custom hooks for API operations
+├── pages/               # Page components
+├── services/            # API services
+└── lib/                 # Utilities
+```
+
+## Key Components
+
+### Custom Hooks
+- useApi: Generic API handler with loading/error states
+- useCompanies: Company CRUD operations
+- useTasks: Task CRUD operations
+- useTemplates: Template CRUD operations
+
+### Reusable Components
+- Modal/ConfirmModal: Dialog components
+- FormField: Standardized form inputs
+- SearchBar: Search functionality
+- StatusBadge: Task status display
+- LoadingSpinner: Loading states
+
+### Pages
+- Login: User authentication
+- Dashboard: Overview with statistics
+- CompanyList: Company management
+- CompanyPage: Individual company details and tasks
+- TaskTemplates: Template management
+- UserProfile: User settings
+
+## Firebase Configuration
+Required environment variables in .env:
+- VITE_FIREBASE_API_KEY
+- VITE_FIREBASE_AUTH_DOMAIN
+- VITE_FIREBASE_PROJECT_ID
+- VITE_FIREBASE_STORAGE_BUCKET
+- VITE_FIREBASE_MESSAGING_SENDER_ID
+- VITE_FIREBASE_APP_ID
+
+## Data Structure
+- Users: Authentication and profile data
+- Companies: Company information per user
+- Tasks: Tasks associated with companies
+- TaskTemplates: Reusable task templates
+
+## Installation & Setup
+1. Clone repository
+2. Run `npm install`
+3. Configure Firebase project
+4. Update .env with Firebase credentials
+5. Run `npm run dev`
+
+## Key Features Implementation
+- Centralized API logic through custom hooks
+- Consistent error handling and user feedback
+- Responsive design with mobile-first approach
+- Real-time data synchronization with Firebase
+- Component reusability for maintainable code
+
+## Architecture Benefits
+- Separation of concerns with hooks and services
+- Reusable components reduce code duplication
+- Centralized state management
+- Type-safe API operations
+- Consistent UI/UX patterns

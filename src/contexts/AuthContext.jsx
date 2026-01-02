@@ -15,6 +15,10 @@ export function AuthProvider({ children }) {
       setUser(authUser)
 
       if (authUser) {
+        // Store token in localStorage
+        const token = await authUser.getIdToken()
+        localStorage.setItem('authToken', token)
+        
         // Get or create user profile
         const profileResult = await getUserProfile(authUser.uid)
 
@@ -30,6 +34,7 @@ export function AuthProvider({ children }) {
         }
       } else {
         setUserProfile(null)
+        localStorage.removeItem('authToken')
       }
 
       setLoading(false)

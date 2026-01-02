@@ -16,7 +16,9 @@ export default function Dashboard({ tasks, companies }) {
     const now = new Date()
     const dayOfWeek = now.getDay()
     const diff = now.getDate() - dayOfWeek
-    return new Date(now.setDate(diff))
+    const weekStart = new Date(now)
+    weekStart.setDate(diff)
+    return weekStart
   }
 
   const getWeekEnd = () => {
@@ -265,7 +267,7 @@ export default function Dashboard({ tasks, companies }) {
                                         <span className="text-gray-600">Pending</span>
                                         <span className="font-medium text-gray-600">{pendingTasks}</span>
                                       </div>
-                                      {overdueTasks >= 0 && (
+                                      {overdueTasks > 0 && (
                                         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between text-xs sm:text-sm">
                                           <span className="text-red-600">Overdue</span>
                                           <span className="font-medium text-red-600">{overdueTasks}</span>

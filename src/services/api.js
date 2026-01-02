@@ -3,8 +3,7 @@
  * Handles all HTTP requests to the backend API endpoints
  */
 
-const API_BASE_URL = 'https://arjava.proxy.beeceptor.com'
-const COMPANIES_GET_URL = 'https://taskflow.free.beeceptor.com/companies'
+const BASE_URL = import.meta.env.VITE_TEST_BASE_URL
 
 /**
  * Generic API request handler
@@ -14,9 +13,11 @@ const COMPANIES_GET_URL = 'https://taskflow.free.beeceptor.com/companies'
  */
 const apiRequest = async (url, options = {}) => {
   try {
+    const token = localStorage.getItem('authToken')
     const response = await fetch(url, {
       headers: {
         'Content-Type': 'application/json',
+        ...(token && { 'Authorization': `Bearer ${token}` }),
         ...options.headers
       },
       ...options
@@ -33,11 +34,11 @@ const apiRequest = async (url, options = {}) => {
 // ===== COMPANY API CALLS =====
 
 /**
- * Fetch all companies from the server
- * Used in: Login function to populate companies list
+ * Fetch all schools from the server
+ * Used in: Login function to populate schools list
  */
 export const fetchCompanies = async () => {
-  return await apiRequest(COMPANIES_GET_URL)
+  return await apiRequest(`${BASE_URL}/getall_companies`)
 }
 
 /**
@@ -60,7 +61,7 @@ export const createCompany = async (companyData) => {
     zip: companyData.zipCode || ''
   }
   
-  return await apiRequest(`${API_BASE_URL}/company`, {
+  return await apiRequest(`${BASE_URL}/create_company`, {
     method: 'POST',
     body: JSON.stringify(payload)
   })
@@ -69,25 +70,25 @@ export const createCompany = async (companyData) => {
 /**
  * Update an existing company
  * Used in: CompanyPage when editing company details
- * @param {number} id - Company ID
+ * @param {string} id - Company ID
  * @param {object} companyData - Updated company information
  */
 export const updateCompany = async (id, companyData) => {
   const payload = {
     name: companyData.name || '',
-    EIN: companyData.ein || '',
+    EIN: companyData.EIN || companyData.ein || '',
     startDate: companyData.startDate || '',
     stateIncorporated: companyData.stateIncorporated || '',
-    contactPersonName: companyData.contactName || '',
-    contactPersonPhNumber: companyData.contactPhone || '',
+    contactPersonName: companyData.contactPersonName || companyData.contactName || '',
+    contactPersonPhNumber: companyData.contactPersonPhNumber || companyData.contactPhone || '',
     address1: companyData.address1 || '',
     address2: companyData.address2 || '',
     city: companyData.city || '',
     state: companyData.state || '',
-    zip: companyData.zipCode || ''
+    zip: companyData.zip || companyData.zipCode || ''
   }
   
-  return await apiRequest(`${API_BASE_URL}/companies/${id}`, {
+  return await apiRequest(`${BASE_URL}/update_company/${id}`, {
     method: 'PUT',
     body: JSON.stringify(payload)
   })
@@ -99,7 +100,7 @@ export const updateCompany = async (id, companyData) => {
  * @param {number} id - Company ID
  */
 export const deleteCompany = async (id) => {
-  return await apiRequest(`${API_BASE_URL}/deletecompany/${id}`, {
+  return await apiRequest(`${BASE_URL}/deletecompany/${id}`, {
     method: 'DELETE'
   })
 }
@@ -111,7 +112,7 @@ export const deleteCompany = async (id) => {
  * Used in: App initialization to load all tasks
  */
 export const fetchTasks = async () => {
-  return await apiRequest(`${API_BASE_URL}/tasks`)
+  return await apiRequest(`${BASE_URL}/tasks`)
 }
 
 /**
@@ -128,7 +129,7 @@ export const createTask = async (taskData) => {
     status: taskData.status || 'Pending'
   }
   
-  return await apiRequest(`${API_BASE_URL}/tasks`, {
+  return await apiRequest(`${BASE_URL}/tasks`, {
     method: 'POST',
     body: JSON.stringify(payload)
   })
@@ -149,7 +150,7 @@ export const updateTask = async (id, taskData) => {
     completionDate: taskData.completionDate || ''
   }
   
-  return await apiRequest(`${API_BASE_URL}/updatetasks/${id}`, {
+  return await apiRequest(`${BASE_URL}/updatetasks/${id}`, {
     method: 'PUT',
     body: JSON.stringify(payload)
   })
@@ -161,7 +162,7 @@ export const updateTask = async (id, taskData) => {
  * @param {number} id - Task ID
  */
 export const deleteTask = async (id) => {
-  return await apiRequest(`${API_BASE_URL}/deletetasks/${id}`, {
+  return await apiRequest(`${BASE_URL}/deletetasks/${id}`, {
     method: 'DELETE'
   })
 }
@@ -173,7 +174,7 @@ export const deleteTask = async (id) => {
  * Used in: TaskTemplates page for initial template loading
  */
 export const fetchTemplates = async () => {
-  return await apiRequest(`${API_BASE_URL}/templates`)
+  return await apiRequest(`${BASE_URL}/templates`)
 }
 
 /**
@@ -188,7 +189,7 @@ export const createTemplate = async (templateData) => {
     estimatedDays: templateData.estimatedDays || 0
   }
   
-  return await apiRequest(`${API_BASE_URL}/templates`, {
+  return await apiRequest(`${BASE_URL}/templates`, {
     method: 'POST',
     body: JSON.stringify(payload)
   })
@@ -200,7 +201,7 @@ export const createTemplate = async (templateData) => {
  * @param {number} id - Template ID
  */
 export const deleteTemplate = async (id) => {
-  return await apiRequest(`${API_BASE_URL}/deletetemplate/${id}`, {
+  return await apiRequest(`${BASE_URL}/deletetemplate/${id}`, {
     method: 'DELETE'
   })
 }
@@ -218,7 +219,7 @@ export const assignTemplate = async (id, assignData) => {
     dueDate: assignData.dueDate || ''
   }
   
-  return await apiRequest(`${API_BASE_URL}/templates/${id}/assign`, {
+  return await apiRequest(`${BASE_URL}/templates/${id}/assign`, {
     method: 'POST',
     body: JSON.stringify(payload)
   })
