@@ -53,11 +53,6 @@ export default function CompanyPage({ companies, tasks, onUpdateCompany, onDelet
     setShowTaskForm(true)
   }
 
-  const handleDeleteTask = () => {
-    onDeleteTask(deleteModal.task.id, company.id)
-    setDeleteModal({ show: false, task: null })
-  }
-
   const filteredTasks = companyTasks.filter(task =>
     task.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     task.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -87,27 +82,27 @@ export default function CompanyPage({ companies, tasks, onUpdateCompany, onDelet
       </div>
 
       {/* Company Overview Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
         <Card className="border-l-4 border-l-blue-500">
-          <CardContent className="p-3 sm:p-4 lg:p-6">
+          <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs sm:text-sm font-medium text-gray-600">Total Tasks</p>
-                <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">{companyTasks.length}</p>
+                <p className="text-sm font-medium text-gray-600">Total Tasks</p>
+                <p className="text-3xl font-bold text-gray-900">{companyTasks.length}</p>
               </div>
-              <FileText className="h-6 w-6 sm:h-7 sm:w-7 lg:h-8 lg:w-8 text-blue-500" />
+              <FileText className="h-8 w-8 text-blue-500" />
             </div>
           </CardContent>
         </Card>
 
         <Card className="border-l-4 border-l-green-500">
-          <CardContent className="p-3 sm:p-4 lg:p-6">
+          <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs sm:text-sm font-medium text-gray-600">Completed</p>
-                <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">{companyTasks.filter(t => t.status === 'Done').length}</p>
+                <p className="text-sm font-medium text-gray-600">Completed</p>
+                <p className="text-3xl font-bold text-gray-900">{companyTasks.filter(t => t.status === 'Done').length}</p>
               </div>
-              <CheckCircle className="h-6 w-6 sm:h-7 sm:w-7 lg:h-8 lg:w-8 text-green-500" />
+              <CheckCircle className="h-8 w-8 text-green-500" />
             </div>
           </CardContent>
         </Card>
@@ -116,8 +111,8 @@ export default function CompanyPage({ companies, tasks, onUpdateCompany, onDelet
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs sm:text-sm font-medium text-gray-600">In Progress</p>
-                <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">{companyTasks.filter(t => t.status === 'In Progress').length}</p>
+                <p className="text-sm font-medium text-gray-600">In Progress</p>
+                <p className="text-3xl font-bold text-gray-900">{companyTasks.filter(t => t.status === 'In Progress').length}</p>
               </div>
               <Clock className="h-8 w-8 text-slate-900" />
             </div>
@@ -125,18 +120,18 @@ export default function CompanyPage({ companies, tasks, onUpdateCompany, onDelet
         </Card>
 
         <Card className="border-l-4 border-l-red-500">
-          <CardContent className="p-3 sm:p-4 lg:p-6">
+          <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs sm:text-sm font-medium text-gray-600">Overdue</p>
-                <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">
+                <p className="text-sm font-medium text-gray-600">Overdue</p>
+                <p className="text-3xl font-bold text-gray-900">
                   {companyTasks.filter(t => {
                     if (!t.dueDate || t.status === 'Done') return false
                     return new Date(t.dueDate) < new Date()
                   }).length || 0}
                 </p>
               </div>
-              <AlertCircle className="h-6 w-6 sm:h-7 sm:w-7 lg:h-8 lg:w-8 text-red-500" />
+              <AlertCircle className="h-8 w-8 text-red-500" />
             </div>
           </CardContent>
         </Card>
@@ -205,18 +200,18 @@ export default function CompanyPage({ companies, tasks, onUpdateCompany, onDelet
       </Card>
 
       {/* Modern Charts */}
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 lg:gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
         {/* Weekly Task Trend Chart */}
         <Card className="shadow-lg">
           <CardHeader>
-            <CardTitle className="text-lg sm:text-xl flex items-center gap-2">
-              <BarChart3 className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600" />
-              <span className="text-sm sm:text-xl">Weekly Task Trend</span>
+            <CardTitle className="text-xl flex items-center gap-2">
+              <BarChart3 className="h-5 w-5 text-blue-600" />
+              Weekly Task Trend
             </CardTitle>
-            <CardDescription className="text-xs sm:text-sm">Weekly task completion progress</CardDescription>
+            <CardDescription>Weekly task completion progress</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="relative h-48 sm:h-64">
+            <div className="relative h-64">
               <div className="absolute left-0 top-0 h-full flex flex-col justify-between text-xs text-gray-400 pr-2">
                 <span>10</span>
                 <span>8</span>
@@ -240,8 +235,7 @@ export default function CompanyPage({ companies, tasks, onUpdateCompany, onDelet
                   
                   // Get current week
                   const today = new Date()
-                  const startOfWeek = new Date(today)
-                  startOfWeek.setDate(today.getDate() - today.getDay())
+                  const startOfWeek = new Date(today.setDate(today.getDate() - today.getDay()))
                   
                   return ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day, index) => {
                     const dayDate = new Date(startOfWeek)
@@ -282,14 +276,14 @@ export default function CompanyPage({ companies, tasks, onUpdateCompany, onDelet
         {/* Task Status Line Chart */}
         <Card className="shadow-lg">
           <CardHeader>
-            <CardTitle className="text-lg sm:text-xl flex items-center gap-2">
-              <BarChart3 className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600" />
-              <span className="text-sm sm:text-xl">Task Status Trend</span>
+            <CardTitle className="text-xl flex items-center gap-2">
+              <BarChart3 className="h-5 w-5 text-blue-600" />
+              Task Status Trend
             </CardTitle>
-            <CardDescription className="text-xs sm:text-sm">Cumulative completed tasks over time</CardDescription>
+            <CardDescription>Cumulative completed tasks over time</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="relative h-48 sm:h-64">
+            <div className="relative h-64">
               <div className="absolute left-0 top-0 h-full flex flex-col justify-between text-xs text-gray-400 pr-2">
                 <span>20</span>
                 <span>15</span>
@@ -312,8 +306,7 @@ export default function CompanyPage({ companies, tasks, onUpdateCompany, onDelet
                   
                   // Get current week
                   const today = new Date()
-                  const startOfWeek = new Date(today)
-                  startOfWeek.setDate(today.getDate() - today.getDay())
+                  const startOfWeek = new Date(today.setDate(today.getDate() - today.getDay()))
                   const completedTasks = filteredTasks.filter(t => t.status === 'Done').length
                   const maxCompleted = Math.max(completedTasks, 20)
                   
@@ -384,15 +377,15 @@ export default function CompanyPage({ companies, tasks, onUpdateCompany, onDelet
         </Card>
       </div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 lg:gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
         {/* Company Information */}
-        <div className="xl:col-span-1">
+        <div className="lg:col-span-1">
           <Card className="h-fit">
             <CardHeader>
-              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-                <CardTitle className="text-lg sm:text-xl flex items-center gap-2">
-                  <Building2 className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600" />
-                  <span className="text-sm sm:text-xl">Company Information</span>
+              <div className="flex justify-between items-center">
+                <CardTitle className="text-xl flex items-center gap-2">
+                  <Building2 className="h-5 w-5 text-blue-600" />
+                  Company Information
                 </CardTitle>
                 <div className="flex gap-2">
                   <Button variant="outline" size="sm" onClick={() => setShowEditModal(true)}>
@@ -404,13 +397,13 @@ export default function CompanyPage({ companies, tasks, onUpdateCompany, onDelet
                 </div>
               </div>
             </CardHeader>
-            <CardContent className="p-4 sm:p-6">
-              <div className="space-y-3 sm:space-y-4">
-                <div className="flex items-start gap-2 sm:gap-3 p-2 sm:p-3 bg-gray-50 rounded-lg">
-                  <Building2 className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600 mt-0.5 flex-shrink-0" />
-                  <div className="min-w-0">
-                    <p className="font-medium text-gray-900 text-sm sm:text-base">EIN</p>
-                    <p className="text-gray-600 text-xs sm:text-sm break-all">{company.EIN || company.ein || 'Not provided'}</p>
+            <CardContent className="p-6">
+              <div className="space-y-4">
+                <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
+                  <Building2 className="h-5 w-5 text-blue-600 mt-0.5" />
+                  <div>
+                    <p className="font-medium text-gray-900">EIN</p>
+                    <p className="text-gray-600">{company.ein}</p>
                   </div>
                 </div>
                 
@@ -418,9 +411,7 @@ export default function CompanyPage({ companies, tasks, onUpdateCompany, onDelet
                   <Calendar className="h-5 w-5 text-blue-600 mt-0.5" />
                   <div>
                     <p className="font-medium text-gray-900">Start Date</p>
-                    <p className="text-gray-600">
-                      {company.startDate ? new Date(company.startDate).toLocaleDateString() : 'Not provided'}
-                    </p>
+                    <p className="text-gray-600">{new Date(company.startDate).toLocaleDateString()}</p>
                   </div>
                 </div>
                 
@@ -428,7 +419,7 @@ export default function CompanyPage({ companies, tasks, onUpdateCompany, onDelet
                   <MapPin className="h-5 w-5 text-blue-600 mt-0.5" />
                   <div>
                     <p className="font-medium text-gray-900">State Incorporated</p>
-                    <p className="text-gray-600">{company.stateIncorporated || 'Not provided'}</p>
+                    <p className="text-gray-600">{company.stateIncorporated}</p>
                   </div>
                 </div>
                 
@@ -436,7 +427,7 @@ export default function CompanyPage({ companies, tasks, onUpdateCompany, onDelet
                   <Mail className="h-5 w-5 text-blue-600 mt-0.5" />
                   <div>
                     <p className="font-medium text-gray-900">Contact Person</p>
-                    <p className="text-gray-600">{company.contactPersonName || company.contactName || 'Not provided'}</p>
+                    <p className="text-gray-600">{company.contactName}</p>
                   </div>
                 </div>
                 
@@ -444,20 +435,7 @@ export default function CompanyPage({ companies, tasks, onUpdateCompany, onDelet
                   <Phone className="h-5 w-5 text-blue-600 mt-0.5" />
                   <div>
                     <p className="font-medium text-gray-900">Phone</p>
-                    <p className="text-gray-600">{company.contactPersonPhNumber || company.contactPhone || 'Not provided'}</p>
-                  </div>
-                </div>
-                
-                <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
-                  <MapPin className="h-5 w-5 text-blue-600 mt-0.5" />
-                  <div>
-                    <p className="font-medium text-gray-900">Address</p>
-                    <p className="text-gray-600">
-                      {company.address1 || 'Not provided'}
-                      {company.address2 && <><br />{company.address2}</>}
-                      <br />
-                      {company.city || 'N/A'}, {company.state || 'N/A'} {company.zipCode || company.zip || 'N/A'}
-                    </p>
+                    <p className="text-gray-600">{company.contactPhone}</p>
                   </div>
                 </div>
               </div>
@@ -466,13 +444,13 @@ export default function CompanyPage({ companies, tasks, onUpdateCompany, onDelet
         </div>
 
         {/* Tasks Section */}
-        <div className="xl:col-span-2">
+        <div className="lg:col-span-2">
           <Card>
             <CardHeader>
-              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-                <CardTitle className="text-lg sm:text-xl flex items-center gap-2">
-                  <FileText className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600" />
-                  <span className="text-sm sm:text-xl">Tasks ({filteredTasks.length})</span>
+              <div className="flex justify-between items-center">
+                <CardTitle className="text-xl flex items-center gap-2">
+                  <FileText className="h-5 w-5 text-blue-600" />
+                  Tasks ({filteredTasks.length})
                 </CardTitle>
                 <Button onClick={() => setShowTaskForm(!showTaskForm)} size="sm" style={{backgroundColor: '#0f172a', color: 'white'}} className="hover:bg-slate-800">
                   <Plus className="h-4 w-4 mr-1" />
@@ -517,13 +495,13 @@ export default function CompanyPage({ companies, tasks, onUpdateCompany, onDelet
                 </div>
               ) : (
                 <div className="overflow-x-auto">
-                  <Table className="min-w-full">
+                  <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead className="min-w-[200px]">Task Name</TableHead>
-                        <TableHead className="min-w-[120px]">Status</TableHead>
-                        <TableHead className="min-w-[120px]">Due Date</TableHead>
-                        <TableHead className="min-w-[150px]">Actions</TableHead>
+                        <TableHead>Task Name</TableHead>
+                        <TableHead className="hidden sm:table-cell">Status</TableHead>
+                        <TableHead className="hidden md:table-cell">Due Date</TableHead>
+                        <TableHead>Actions</TableHead>
                       </TableRow>
                     </TableHeader>
                   <TableBody>
@@ -544,15 +522,11 @@ export default function CompanyPage({ companies, tasks, onUpdateCompany, onDelet
                         </TableCell>
                         <TableCell className="hidden md:table-cell">{task.dueDate}</TableCell>
                         <TableCell>
-                          <StatusBadge status={task.status} />
-                        </TableCell>
-                        <TableCell>{task.dueDate}</TableCell>
-                        <TableCell>
-                          <div className="flex gap-2">
+                          <div className="flex flex-col sm:flex-row gap-1 sm:gap-2">
                             <Button variant="outline" size="sm" onClick={() => startEditTask(task)}>
                               <Edit className="h-4 w-4" />
                             </Button>
-                            <Button variant="outline" size="sm" onClick={() => setDeleteModal({ show: true, task })}>
+                            <Button variant="outline" size="sm" onClick={() => onDeleteTask(task.id, company.id)}>
                               <Trash2 className="h-4 w-4" />
                             </Button>
                           </div>

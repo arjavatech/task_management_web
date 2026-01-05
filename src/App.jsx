@@ -40,10 +40,10 @@ function AppContent() {
     setDataLoading(true)
     try {
       console.log('Loading data for user:', user.uid)
-      
+
       // Load all data in parallel
       const [companiesResult, tasksResult, templatesResult] = await Promise.all([
-        fetchCompanies(),
+        getCompanies(user.uid),
         getTasks(user.uid),
         getTaskTemplates(user.uid)
       ])
@@ -52,12 +52,12 @@ function AppContent() {
       console.log('Tasks result:', tasksResult)
       console.log('Templates result:', templatesResult)
 
-      if (Array.isArray(companiesResult)) {
-        setCompanies(companiesResult)
-        console.log('Companies loaded:', companiesResult.length)
+      if (companiesResult.success) {
+        setCompanies(companiesResult.data || [])
+        console.log('Companies loaded:', companiesResult.data?.length || 0)
       } else {
-        console.error('Failed to load companies:', companiesResult)
-        setModal({ show: true, type: 'error', message: 'Failed to load companies' })
+        console.error('Failed to load companies:', companiesResult.error)
+        setModal({ show: true, type: 'error', message: `Failed to load companies: ${companiesResult.error}` })
       }
 
       if (tasksResult.success) {

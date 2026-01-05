@@ -19,64 +19,6 @@ export default function TaskTemplates({ taskTemplates, onAddTemplate, onAssignTe
   const [assignData, setAssignData] = useState({
     companyIds: [], startDate: '', dueDate: ''
   })
-  const [dateError, setDateError] = useState('')
-  const [duplicateError, setDuplicateError] = useState('')
-
-  const validateDates = (startDate, dueDate) => {
-    if (!startDate || !dueDate) {
-      setDateError('')
-      return true
-    }
-    
-    const start = new Date(startDate)
-    const due = new Date(dueDate)
-    
-    if (due < start) {
-      setDateError('End date cannot be earlier than start date')
-      return false
-    }
-    
-    setDateError('')
-    return true
-  }
-
-  const checkDuplicateAssignments = (templateId, companyIds) => {
-    if (!tasks || !Array.isArray(tasks)) return true
-    
-    const template = taskTemplates.find(t => t.id === templateId)
-    if (!template) return true
-    
-    const duplicateCompanies = []
-    
-    companyIds.forEach(companyId => {
-      const existingTask = tasks.find(task => 
-        task.companyId === companyId && 
-        task.name === template.name
-      )
-      
-      if (existingTask) {
-        const company = companies.find(c => c.id === companyId)
-        duplicateCompanies.push(company?.name || 'Unknown Company')
-      }
-    })
-    
-    if (duplicateCompanies.length > 0) {
-      setDuplicateError(`Task already assigned to: ${duplicateCompanies.join(', ')}`)
-      return false
-    }
-    
-    setDuplicateError('')
-    return true
-  }
-
-  const handleDateChange = (field, value) => {
-    const newAssignData = { ...assignData, [field]: value }
-    setAssignData(newAssignData)
-    
-    if (field === 'startDate' || field === 'dueDate') {
-      validateDates(newAssignData.startDate, newAssignData.dueDate)
-    }
-  }
 
   const handleSubmit = (e) => {
     e.preventDefault()
@@ -85,55 +27,32 @@ export default function TaskTemplates({ taskTemplates, onAddTemplate, onAssignTe
     setShowForm(false)
   }
 
-  const handleDeleteTemplate = () => {
-    onDeleteTemplate(deleteModal.template.id)
-    setDeleteModal({ show: false, template: null })
-  }
-
   const handleAssign = (e) => {
     e.preventDefault()
-    
-    if (!validateDates(assignData.startDate, assignData.dueDate)) {
-      return
-    }
-    
-    if (!checkDuplicateAssignments(showAssignForm, assignData.companyIds)) {
-      return
-    }
-    
     onAssignTemplate(showAssignForm, assignData)
     setAssignData({ companyIds: [], startDate: '', dueDate: '' })
-    setDateError('')
-    setDuplicateError('')
     setShowAssignForm(null)
   }
 
   const toggleCompany = (companyId) => {
-    const newCompanyIds = assignData.companyIds.includes(companyId)
-      ? assignData.companyIds.filter(id => id !== companyId)
-      : [...assignData.companyIds, companyId]
-    
     setAssignData(prev => ({
       ...prev,
-      companyIds: newCompanyIds
+      companyIds: prev.companyIds.includes(companyId)
+        ? prev.companyIds.filter(id => id !== companyId)
+        : [...prev.companyIds, companyId]
     }))
-    
-    // Check for duplicates when companies are selected
-    if (showAssignForm) {
-      checkDuplicateAssignments(showAssignForm, newCompanyIds)
-    }
   }
 
   const filteredTemplates = taskTemplates.filter(template =>
-    (template.name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (template.description || '').toLowerCase().includes(searchTerm.toLowerCase())
+    template.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    template.description.toLowerCase().includes(searchTerm.toLowerCase())
   )
 
   return (
     <>
       {loading && <LoadingSpinner />}
       {/* Header Bar */}
-      <div className="bg-white border-b border-gray-200 px-6 lg:px-8 py-6">
+      <div className="hidden xl:block bg-white border-b border-gray-200 px-6 lg:px-8 py-6 xl:mt-0 mt-6">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
             <h1 className="text-3xl font-bold text-gray-900 mb-2">Task Templates</h1>
@@ -190,35 +109,39 @@ export default function TaskTemplates({ taskTemplates, onAddTemplate, onAssignTe
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <Table className="min-w-full">
+              <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="min-w-[200px]">Template Name</TableHead>
-                    <TableHead className="min-w-[250px]">Description</TableHead>
-                    <TableHead className="min-w-[120px]">Estimated Days</TableHead>
-                    <TableHead className="min-w-[150px]">Actions</TableHead>
+                    <TableHead>Template Name</TableHead>
+                    <TableHead className="hidden sm:table-cell">Description</TableHead>
+                    <TableHead className="hidden md:table-cell">Estimated Days</TableHead>
+                    <TableHead>Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {filteredTemplates.map(template => (
                     <TableRow key={template.id}>
                       <TableCell className="font-medium">
-                        <p className="text-sm lg:text-base font-medium">{template.name}</p>
+                        <div>
+                          <p className="text-sm lg:text-base">{template.name}</p>
+                          <div className="sm:hidden mt-1 space-y-1">
+                            <p className="text-xs text-gray-500">{template.description}</p>
+                            <p className="text-xs text-gray-500 md:hidden">{template.estimatedDays} days</p>
+                          </div>
+                        </div>
                       </TableCell>
+                      <TableCell className="hidden sm:table-cell">{template.description}</TableCell>
+                      <TableCell className="hidden md:table-cell">{template.estimatedDays} days</TableCell>
                       <TableCell>
-                        <p className="text-sm">{template.description}</p>
-                      </TableCell>
-                      <TableCell>{template.estimatedDays} days</TableCell>
-                      <TableCell>
-                        <div className="flex gap-2">
+                        <div className="flex flex-col sm:flex-row gap-1 sm:gap-2">
                           <Button 
                             variant="outline" 
                             size="sm" 
                             onClick={() => setShowAssignForm(template.id)}
-                            className="flex items-center gap-1 text-xs sm:text-sm whitespace-nowrap"
+                            className="flex items-center gap-1 text-xs sm:text-sm"
                           >
                             <Copy className="h-3 w-3" />
-                            Assign
+                            <span className="hidden sm:inline">Assign</span>
                           </Button>
                           <Button 
                             variant="outline" 

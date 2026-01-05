@@ -6,12 +6,6 @@ import { useState, useEffect } from 'react'
 export default function Layout({ children, user, onLogout }) {
   const location = useLocation()
   const [sidebarOpen, setSidebarOpen] = useState(false)
-  const [showLogoutModal, setShowLogoutModal] = useState(false)
-
-  const handleLogout = () => {
-    onLogout()
-    setShowLogoutModal(false)
-  }
 
   // Close sidebar when route changes on mobile
   useEffect(() => {
@@ -153,21 +147,10 @@ export default function Layout({ children, user, onLogout }) {
 
       {/* Main Content */}
       <div className="xl:ml-80">
-        <main className="p-3 sm:p-4 lg:p-6 pt-14 sm:pt-16 xl:pt-6">
+        <main className="p-3 sm:p-4 lg:p-6 pt-14 sm:pt-16 xl:pt-6 xl:mt-0 mt-6">
           {children}
         </main>
       </div>
-      
-      {/* Logout Confirmation Modal */}
-      <ConfirmModal
-        show={showLogoutModal}
-        onClose={() => setShowLogoutModal(false)}
-        onConfirm={handleLogout}
-        title="Sign Out"
-        message="Are you sure you want to sign out?"
-        confirmText="Sign Out"
-        variant="danger"
-      />
     </div>
   )
 }

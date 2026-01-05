@@ -49,9 +49,9 @@ export default function Dashboard2({ tasks, companies }) {
   const completionRate = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0
 
   return (
-    <div className="min-h-screen bg-blue-50">
+    <div className="min-h-screen bg-blue-50 xl:mt-0 mt-6">
       {/* Header Bar */}
-      <div className="bg-white border-b border-gray-200 px-6 lg:px-8 py-6">
+      <div className="hidden xl:block bg-white border-b border-gray-200 px-6 lg:px-8 py-6">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold text-gray-900 mb-2">Dashboard</h1>
