@@ -13,7 +13,6 @@ export default function TaskTemplates({ taskTemplates, onAddTemplate, onAssignTe
   const [showAssignForm, setShowAssignForm] = useState(null)
   const [deleteModal, setDeleteModal] = useState({ show: false, template: null })
   const [searchTerm, setSearchTerm] = useState('')
-  const [deleteModal, setDeleteModal] = useState({ show: false, template: null })
   const [templateData, setTemplateData] = useState({
     name: '', description: '', estimatedDays: ''
   })
