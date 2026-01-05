@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate, Navigate } from 'react-router-dom'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -24,6 +24,17 @@ export default function Login() {
   if (user) {
     return <Navigate to="/dashboard" replace />
   }
+
+  // Auto-hide messages after 3 seconds
+  useEffect(() => {
+    if (message || error) {
+      const timer = setTimeout(() => {
+        setMessage('')
+        setError('')
+      }, 3000)
+      return () => clearTimeout(timer)
+    }
+  }, [message, error])
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -80,7 +91,7 @@ export default function Login() {
           <div className="flex-1 flex flex-col justify-center px-8 lg:px-12">
             {/* Logo & App Name */}
             <div className="flex items-center gap-3 mb-16">
-              <div className="w-10 h-10 bg-gradient-to-br from-orange-400 to-orange-600 rounded-lg flex items-center justify-center">
+              <div className="w-10 h-10 bg-slate-900 rounded-lg flex items-center justify-center">
                 <Building2 className="w-6 h-6 text-white" />
               </div>
               <span className="text-2xl font-bold text-white">TaskFlow</span>
@@ -101,14 +112,14 @@ export default function Login() {
               <div className="grid grid-cols-2 gap-6">
                 <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20">
                   <div className="flex items-center gap-3 mb-2">
-                    <Users className="w-6 h-6 text-orange-400" />
+                    <Users className="w-6 h-6 text-slate-300" />
                     <span className="text-2xl font-bold text-white">500+</span>
                   </div>
                   <p className="text-slate-300">Companies Managed</p>
                 </div>
                 <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20">
                   <div className="flex items-center gap-3 mb-2">
-                    <Target className="w-6 h-6 text-orange-400" />
+                    <Target className="w-6 h-6 text-slate-300" />
                     <span className="text-2xl font-bold text-white">10K+</span>
                   </div>
                   <p className="text-slate-300">Tasks Completed</p>
@@ -194,7 +205,7 @@ export default function Login() {
 
                   <Button
                     type="submit"
-                    className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-semibold py-3 rounded-lg"
+                    className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg"
                     disabled={loading}
                   >
                     {loading ? (
@@ -212,7 +223,7 @@ export default function Login() {
                   <button
                     type="button"
                     onClick={toggleMode}
-                    className="text-sm text-orange-400 hover:text-orange-300 font-medium"
+                    className="text-sm text-blue-400 hover:text-blue-300 font-medium"
                   >
                     {isSignUp
                       ? 'Already have an account? Sign in'

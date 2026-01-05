@@ -29,7 +29,7 @@ export const ConfirmModal = ({ show, onClose, onConfirm, title, message, confirm
         </Button>
         <Button 
           onClick={onConfirm} 
-          className={`flex-1 ${variant === 'danger' ? 'bg-red-600 hover:bg-red-700 text-white' : 'bg-blue-600 hover:bg-blue-700'}`}
+          className={`flex-1 ${variant === 'danger' ? 'bg-red-600 hover:bg-red-700 text-white' : 'bg-orange-500 hover:bg-orange-600 text-white'}`}
         >
           {confirmText}
         </Button>

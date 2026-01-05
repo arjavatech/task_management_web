@@ -61,7 +61,7 @@ export const TaskForm = ({ initialData = {}, onSubmit, onCancel, submitText = "A
             Cancel
           </Button>
         )}
-        <Button type="submit" className="flex-1 bg-blue-600 hover:bg-blue-700">
+        <Button type="submit" style={{backgroundColor: '#fcd500', color: 'black'}} className="flex-1 hover:bg-orange-600 text-white">
           {submitText}
         </Button>
       </div>

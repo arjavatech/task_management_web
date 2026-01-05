@@ -57,14 +57,6 @@ export const createUserProfile = async (userId, email, name = '') => {
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
       isActive: true,
-      profile: {
-        reminderSettings: {
-          enabled: true,
-          daysBefore: 3,
-          timeOfDay: '09:00'
-        },
-        ccEmails: []
-      },
       companyCount: 0,
       taskCount: 0
     })

@@ -1,16 +1,17 @@
 import { useState } from 'react'
-import { useParams, Link } from 'react-router-dom'
+import { useParams, Link, useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Building2, MapPin, Phone, Mail, Calendar, Edit, Plus, FileText, ArrowLeft, CheckCircle, Clock, AlertCircle, Trash2, BarChart3 } from 'lucide-react'
-import { Modal, SearchBar, StatusBadge } from '../components/common'
+import { Modal, SearchBar, StatusBadge, LoadingSpinner, ConfirmModal } from '../components/common'
 import { CompanyForm, TaskForm } from '../components/forms'
 
-export default function CompanyPage({ companies, tasks, onUpdateCompany, onAddTask, onUpdateTask, onDeleteTask, taskTemplates, onAssignTemplate }) {
+export default function CompanyPage({ companies, tasks, onUpdateCompany, onDeleteCompany, onAddTask, onUpdateTask, onDeleteTask, taskTemplates, onAssignTemplate, loading }) {
   const { id } = useParams()
+  const navigate = useNavigate()
   const company = companies.find(c => c.id === id)
   const companyTasks = tasks.filter(t => t.companyId === id)
   
@@ -18,6 +19,7 @@ export default function CompanyPage({ companies, tasks, onUpdateCompany, onAddTa
   const [editingTask, setEditingTask] = useState(null)
   const [searchTerm, setSearchTerm] = useState('')
   const [showEditModal, setShowEditModal] = useState(false)
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [filterYear, setFilterYear] = useState(0)
   const [filterMonth, setFilterMonth] = useState(0)
 
@@ -28,6 +30,12 @@ export default function CompanyPage({ companies, tasks, onUpdateCompany, onAddTa
   const handleCompanySubmit = (formData) => {
     onUpdateCompany(company.id, formData)
     setShowEditModal(false)
+  }
+
+  const handleDeleteCompany = async () => {
+    await onDeleteCompany(company.id)
+    setShowDeleteModal(false)
+    navigate('/companies')
   }
 
   const handleTaskSubmit = (formData) => {
@@ -52,14 +60,15 @@ export default function CompanyPage({ companies, tasks, onUpdateCompany, onAddTa
   )
 
   return (
-    <div className="p-4 lg:p-8 space-y-6 lg:space-y-8">
+    <>
+      {loading && <LoadingSpinner />}
+      <div className="p-4 lg:p-8 space-y-6 lg:space-y-8">
       {/* Header */}
       <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-4 sm:space-y-0 sm:space-x-4">
-          <Link to="/companies">
-            <Button variant="outline" size="sm">
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Companies
+        <div className="flex flex-col lg:flex-row items-start lg:items-center space-y-4 sm:space-y-0 sm:space-x-4">
+          <Link to="/companies" className="self-start">
+            <Button size="lg" className="p-3 mb-3 mt-1" style={{backgroundColor: '#0f172a'}}>
+              <ArrowLeft className="h-6 w-6 text-white" />
             </Button>
           </Link>
           <div>
@@ -98,14 +107,14 @@ export default function CompanyPage({ companies, tasks, onUpdateCompany, onAddTa
           </CardContent>
         </Card>
 
-        <Card className="border-l-4 border-l-yellow-500">
+        <Card className="border-l-4 border-l-slate-900">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">In Progress</p>
                 <p className="text-3xl font-bold text-gray-900">{companyTasks.filter(t => t.status === 'In Progress').length}</p>
               </div>
-              <Clock className="h-8 w-8 text-yellow-500" />
+              <Clock className="h-8 w-8 text-slate-900" />
             </div>
           </CardContent>
         </Card>
@@ -382,7 +391,7 @@ export default function CompanyPage({ companies, tasks, onUpdateCompany, onAddTa
                   <Button variant="outline" size="sm" onClick={() => setShowEditModal(true)}>
                     <Edit className="h-4 w-4" />
                   </Button>
-                  <Button variant="outline" size="sm" className="text-red-500 hover:text-red-700 hover:bg-red-50 border-red-200">
+                  <Button variant="outline" size="sm" onClick={() => setShowDeleteModal(true)} className="text-red-500 hover:text-red-700 hover:bg-red-50 border-red-200">
                     <Trash2 className="h-4 w-4" />
                   </Button>
                 </div>
@@ -399,7 +408,7 @@ export default function CompanyPage({ companies, tasks, onUpdateCompany, onAddTa
                 </div>
                 
                 <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
-                  <Calendar className="h-5 w-5 text-green-600 mt-0.5" />
+                  <Calendar className="h-5 w-5 text-blue-600 mt-0.5" />
                   <div>
                     <p className="font-medium text-gray-900">Start Date</p>
                     <p className="text-gray-600">{new Date(company.startDate).toLocaleDateString()}</p>
@@ -407,7 +416,7 @@ export default function CompanyPage({ companies, tasks, onUpdateCompany, onAddTa
                 </div>
                 
                 <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
-                  <MapPin className="h-5 w-5 text-purple-600 mt-0.5" />
+                  <MapPin className="h-5 w-5 text-blue-600 mt-0.5" />
                   <div>
                     <p className="font-medium text-gray-900">State Incorporated</p>
                     <p className="text-gray-600">{company.stateIncorporated}</p>
@@ -415,7 +424,7 @@ export default function CompanyPage({ companies, tasks, onUpdateCompany, onAddTa
                 </div>
                 
                 <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
-                  <Mail className="h-5 w-5 text-indigo-600 mt-0.5" />
+                  <Mail className="h-5 w-5 text-blue-600 mt-0.5" />
                   <div>
                     <p className="font-medium text-gray-900">Contact Person</p>
                     <p className="text-gray-600">{company.contactName}</p>
@@ -423,7 +432,7 @@ export default function CompanyPage({ companies, tasks, onUpdateCompany, onAddTa
                 </div>
                 
                 <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
-                  <Phone className="h-5 w-5 text-green-600 mt-0.5" />
+                  <Phone className="h-5 w-5 text-blue-600 mt-0.5" />
                   <div>
                     <p className="font-medium text-gray-900">Phone</p>
                     <p className="text-gray-600">{company.contactPhone}</p>
@@ -443,7 +452,7 @@ export default function CompanyPage({ companies, tasks, onUpdateCompany, onAddTa
                   <FileText className="h-5 w-5 text-blue-600" />
                   Tasks ({filteredTasks.length})
                 </CardTitle>
-                <Button onClick={() => setShowTaskForm(!showTaskForm)} size="sm" className="bg-blue-600 hover:bg-blue-700">
+                <Button onClick={() => setShowTaskForm(!showTaskForm)} size="sm" style={{backgroundColor: '#0f172a', color: 'white'}} className="hover:bg-slate-800">
                   <Plus className="h-4 w-4 mr-1" />
                   {showTaskForm ? 'Cancel' : 'Add Task'}
                 </Button>
@@ -461,7 +470,7 @@ export default function CompanyPage({ companies, tasks, onUpdateCompany, onAddTa
               {showTaskForm && (
                 <div className="mb-6 p-4 bg-gray-50 rounded-lg">
                   <TaskForm
-                    initialData={editingTask}
+                    initialData={editingTask || undefined}
                     onSubmit={handleTaskSubmit}
                     onCancel={() => {
                       setShowTaskForm(false)
@@ -548,6 +557,18 @@ export default function CompanyPage({ companies, tasks, onUpdateCompany, onAddTa
           submitText="Save Changes"
         />
       </Modal>
-    </div>
+
+      {/* Delete Company Confirmation Modal */}
+      <ConfirmModal
+        show={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onConfirm={handleDeleteCompany}
+        title="Delete Company"
+        message={`Are you sure you want to delete "${company.name}"? This will permanently delete the company and all associated tasks. This action cannot be undone.`}
+        confirmText="Delete"
+        variant="danger"
+      />
+      </div>
+    </>
   )
 }

@@ -17,13 +17,57 @@ export const CompanyForm = ({ initialData = {}, onSubmit, onCancel, submitText =
     zipCode: initialData.zipCode || ''
   })
 
+  const [errors, setErrors] = useState({})
+
+  const validateForm = () => {
+    const newErrors = {}
+    
+    if (!formData.name.trim()) newErrors.name = 'Company name is required'
+    
+    if (!formData.ein.trim()) {
+      newErrors.ein = 'EIN is required'
+    } else if (!/^\d{2}-\d{7}$/.test(formData.ein)) {
+      newErrors.ein = 'EIN must be in format XX-XXXXXXX'
+    }
+    
+    if (!formData.startDate) newErrors.startDate = 'Start date is required'
+    
+    if (!formData.stateIncorporated.trim()) newErrors.stateIncorporated = 'State incorporated is required'
+    
+    if (!formData.contactName.trim()) newErrors.contactName = 'Contact name is required'
+    
+    if (!formData.contactPhone.trim()) {
+      newErrors.contactPhone = 'Contact phone is required'
+    } else if (!/^\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}$/.test(formData.contactPhone)) {
+      newErrors.contactPhone = 'Invalid phone number format'
+    }
+    
+    if (!formData.address1.trim()) newErrors.address1 = 'Address is required'
+    if (!formData.city.trim()) newErrors.city = 'City is required'
+    if (!formData.state.trim()) newErrors.state = 'State is required'
+    
+    if (!formData.zipCode.trim()) {
+      newErrors.zipCode = 'Zip code is required'
+    } else if (!/^\d{5}(-\d{4})?$/.test(formData.zipCode)) {
+      newErrors.zipCode = 'Invalid zip code format'
+    }
+    
+    setErrors(newErrors)
+    return Object.keys(newErrors).length === 0
+  }
+
   const handleChange = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }))
+    if (errors[field]) {
+      setErrors(prev => ({ ...prev, [field]: '' }))
+    }
   }
 
   const handleSubmit = (e) => {
     e.preventDefault()
-    onSubmit(formData)
+    if (validateForm()) {
+      onSubmit(formData)
+    }
   }
 
   return (
@@ -33,6 +77,8 @@ export const CompanyForm = ({ initialData = {}, onSubmit, onCancel, submitText =
         id="name"
         value={formData.name}
         onChange={(value) => handleChange('name', value)}
+        placeholder="Enter company name"
+        error={errors.name}
         required
       />
       <FormField
@@ -40,6 +86,8 @@ export const CompanyForm = ({ initialData = {}, onSubmit, onCancel, submitText =
         id="ein"
         value={formData.ein}
         onChange={(value) => handleChange('ein', value)}
+        placeholder="XX-XXXXXXX"
+        error={errors.ein}
         required
       />
       <FormField
@@ -48,6 +96,7 @@ export const CompanyForm = ({ initialData = {}, onSubmit, onCancel, submitText =
         type="date"
         value={formData.startDate}
         onChange={(value) => handleChange('startDate', value)}
+        error={errors.startDate}
         required
       />
       <FormField
@@ -55,6 +104,8 @@ export const CompanyForm = ({ initialData = {}, onSubmit, onCancel, submitText =
         id="stateIncorporated"
         value={formData.stateIncorporated}
         onChange={(value) => handleChange('stateIncorporated', value)}
+        placeholder="e.g., Delaware, California"
+        error={errors.stateIncorporated}
         required
       />
       <FormField
@@ -62,6 +113,8 @@ export const CompanyForm = ({ initialData = {}, onSubmit, onCancel, submitText =
         id="contactName"
         value={formData.contactName}
         onChange={(value) => handleChange('contactName', value)}
+        placeholder="Enter contact person's full name"
+        error={errors.contactName}
         required
       />
       <FormField
@@ -69,6 +122,8 @@ export const CompanyForm = ({ initialData = {}, onSubmit, onCancel, submitText =
         id="contactPhone"
         value={formData.contactPhone}
         onChange={(value) => handleChange('contactPhone', value)}
+        placeholder="(555) 123-4567"
+        error={errors.contactPhone}
         required
       />
       <FormField
@@ -76,6 +131,8 @@ export const CompanyForm = ({ initialData = {}, onSubmit, onCancel, submitText =
         id="address1"
         value={formData.address1}
         onChange={(value) => handleChange('address1', value)}
+        placeholder="Street address"
+        error={errors.address1}
         required
       />
       <FormField
@@ -83,12 +140,15 @@ export const CompanyForm = ({ initialData = {}, onSubmit, onCancel, submitText =
         id="address2"
         value={formData.address2}
         onChange={(value) => handleChange('address2', value)}
+        placeholder="Apartment, suite, etc. (optional)"
       />
       <FormField
         label="City"
         id="city"
         value={formData.city}
         onChange={(value) => handleChange('city', value)}
+        placeholder="Enter city"
+        error={errors.city}
         required
       />
       <FormField
@@ -96,6 +156,8 @@ export const CompanyForm = ({ initialData = {}, onSubmit, onCancel, submitText =
         id="state"
         value={formData.state}
         onChange={(value) => handleChange('state', value)}
+        placeholder="Enter state"
+        error={errors.state}
         required
       />
       <FormField
@@ -103,6 +165,8 @@ export const CompanyForm = ({ initialData = {}, onSubmit, onCancel, submitText =
         id="zipCode"
         value={formData.zipCode}
         onChange={(value) => handleChange('zipCode', value)}
+        placeholder="12345"
+        error={errors.zipCode}
         required
       />
       <div className="sm:col-span-2 flex gap-3">
@@ -111,7 +175,7 @@ export const CompanyForm = ({ initialData = {}, onSubmit, onCancel, submitText =
             Cancel
           </Button>
         )}
-        <Button type="submit" className="flex-1 bg-blue-600 hover:bg-blue-700">
+        <Button type="submit" className="flex-1 bg-slate-900 hover:bg-slate-800 text-white">
           {submitText}
         </Button>
       </div>

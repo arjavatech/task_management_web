@@ -1,7 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import { useState, useEffect } from 'react'
 import Login from './pages/Login'
-import Dashboard from './pages/Dashboard'
+import Dashboard from './pages/Dashboard2'
 import CompanyList from './pages/CompanyList'
 import CompanyPage from './pages/CompanyPage'
 import TaskTemplates from './pages/TaskTemplates'
@@ -12,6 +12,8 @@ import { logoutUser } from './firebase/config'
 import { getCompanies, getTasks, getTaskTemplates } from './services/firebaseService'
 import { useCompanies, useTasks, useTemplates } from './hooks'
 import { LoadingSpinner } from './components/common'
+import { Button } from '@/components/ui/button'
+import { LogOut } from 'lucide-react'
 
 function AppContent() {
   const { user, userProfile, loading, updateUserProfile } = useAuth()
@@ -20,9 +22,16 @@ function AppContent() {
   const [taskTemplates, setTaskTemplates] = useState([])
   const [modal, setModal] = useState({ show: false, type: '', message: '' })
   const [dataLoading, setDataLoading] = useState(false)
+  const [showConfirmSignout, setShowConfirmSignout] = useState(false)
 
   const showModal = (type, message) => {
     setModal({ show: true, type, message })
+    // Auto-dismiss success toasts after 3 seconds
+    if (type === 'success') {
+      setTimeout(() => {
+        setModal({ show: false, type: '', message: '' })
+      }, 3000)
+    }
   }
 
   const loadData = async () => {
@@ -72,9 +81,9 @@ function AppContent() {
     }
   }
 
-  const { addCompany, editCompany, removeCompany } = useCompanies(loadData, showModal)
-  const { addTask, editTask, removeTask } = useTasks(loadData, showModal)
-  const { addTemplate, removeTemplate, assignTemplateToCompanies } = useTemplates(loadData, showModal)
+  const { addCompany, editCompany, removeCompany, loading: companiesLoading } = useCompanies(loadData, showModal)
+  const { addTask, editTask, removeTask, loading: tasksLoading } = useTasks(loadData, showModal)
+  const { addTemplate, removeTemplate, assignTemplateToCompanies, loading: templatesLoading } = useTemplates(loadData, showModal)
 
   // Load data when user logs in
   useEffect(() => {
@@ -89,19 +98,29 @@ function AppContent() {
   }, [user, userProfile])
 
   const logout = async () => {
+    setShowConfirmSignout(true)
+  }
+
+  const confirmLogout = async () => {
     try {
       await logoutUser()
+      setShowConfirmSignout(false)
       // Data will be cleared automatically by the useEffect
     } catch (error) {
       console.error('Error logging out:', error)
+      setShowConfirmSignout(false)
       setModal({ show: true, type: 'error', message: 'Failed to logout' })
     }
   }
 
 
 
+  const [profileLoading, setProfileLoading] = useState(false)
+
   const updateProfile = async (profileData) => {
+    setProfileLoading(true)
     const result = await updateUserProfile(profileData)
+    setProfileLoading(false)
 
     if (result.success) {
       setModal({ show: true, type: 'success', message: 'Profile updated successfully!' })
@@ -114,10 +133,6 @@ function AppContent() {
 
   if (loading) {
     return <LoadingSpinner />
-  }
-
-  if (dataLoading) {
-    return <LoadingSpinner message="Loading your data..." />
   }
 
   return (
@@ -142,6 +157,7 @@ function AppContent() {
                 onAddCompany={addCompany}
                 onUpdateCompany={editCompany}
                 onDeleteCompany={removeCompany}
+                loading={companiesLoading}
               />
             </Layout>
           ) : <Navigate to="/login" />
@@ -153,11 +169,13 @@ function AppContent() {
                 companies={companies}
                 tasks={tasks}
                 onUpdateCompany={editCompany}
+                onDeleteCompany={removeCompany}
                 onAddTask={addTask}
                 onUpdateTask={editTask}
                 onDeleteTask={removeTask}
                 taskTemplates={taskTemplates}
                 onAssignTemplate={assignTemplateToCompanies}
+                loading={companiesLoading || tasksLoading || templatesLoading}
               />
             </Layout>
           ) : <Navigate to="/login" />
@@ -171,6 +189,7 @@ function AppContent() {
                 onAssignTemplate={assignTemplateToCompanies}
                 onDeleteTemplate={removeTemplate}
                 companies={companies}
+                loading={templatesLoading}
               />
             </Layout>
           ) : <Navigate to="/login" />
@@ -181,37 +200,82 @@ function AppContent() {
               <UserProfile
                 user={userProfile || user}
                 onUpdateProfile={updateProfile}
+                loading={profileLoading}
               />
             </Layout>
           ) : <Navigate to="/login" />
         } />
       </Routes>
 
-      {/* Global Modal */}
-      {modal.show && (
+      {/* Data Loading Overlay */}
+      {dataLoading && <LoadingSpinner />}
+
+      {/* Global Toast */}
+      {modal.show && modal.type === 'success' && (
+        <div className="fixed top-4 right-4 z-50 animate-in slide-in-from-right duration-300">
+          <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-lg max-w-sm">
+            <div className="flex items-center gap-3">
+              <div className="w-6 h-6 bg-slate-900 rounded-full flex items-center justify-center flex-shrink-0">
+                <span className="text-white text-sm font-bold">✓</span>
+              </div>
+              <p className="text-gray-900 font-medium text-sm">{modal.message}</p>
+              <button
+                onClick={() => setModal({ show: false, type: '', message: '' })}
+                className="text-gray-400 hover:text-gray-600 ml-auto"
+              >
+                ✕
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Error Modal (keep as modal) */}
+      {modal.show && modal.type === 'error' && (
         <div className="fixed inset-0 backdrop-blur-sm bg-black/50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 max-w-md mx-4 shadow-xl">
             <div className="flex items-center gap-3 mb-4">
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                modal.type === 'success' ? 'bg-green-100' : 'bg-red-100'
-              }`}>
-                <span className={`text-sm font-bold ${
-                  modal.type === 'success' ? 'text-green-600' : 'text-red-600'
-                }`}>
-                  {modal.type === 'success' ? '✓' : '✕'}
-                </span>
+              <div className="w-8 h-8 rounded-full flex items-center justify-center bg-red-100">
+                <span className="text-sm font-bold text-red-600">✕</span>
               </div>
-              <h3 className="text-lg font-semibold text-gray-900">
-                {modal.type === 'success' ? 'Success' : 'Error'}
-              </h3>
+              <h3 className="text-lg font-semibold text-gray-900">Error</h3>
             </div>
             <p className="text-gray-600 mb-6">{modal.message}</p>
             <button
               onClick={() => setModal({ show: false, type: '', message: '' })}
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"
+              className="w-full bg-slate-900 hover:bg-slate-800 text-white font-medium py-2 px-4 rounded-lg transition-colors"
             >
               OK
             </button>
+          </div>
+        </div>
+      )}
+      {/* Confirm Signout Modal */}
+      {showConfirmSignout && (
+        <div className="fixed inset-0 backdrop-blur-sm bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md mx-4 shadow-xl">
+            <div className="text-center">
+              <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <LogOut className="w-8 h-8 text-slate-700" />
+              </div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">Confirm Sign Out</h3>
+              <p className="text-gray-600 mb-6">Are you sure you want to sign out of TaskFlow?</p>
+              <div className="flex gap-3">
+                <Button
+                  onClick={() => setShowConfirmSignout(false)}
+                  variant="outline"
+                  className="flex-1"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={confirmLogout}
+                  className="flex-1 bg-slate-900 hover:bg-slate-800 text-white"
+                >
+                  Sign Out
+                </Button>
+              </div>
+            </div>
           </div>
         </div>
       )}
