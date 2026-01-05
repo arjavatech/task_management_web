@@ -2,13 +2,13 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
-export const FormField = ({ label, id, type = "text", value, onChange, required = false, options = null, placeholder = "" }) => {
+export const FormField = ({ label, id, type = "text", value, onChange, required = false, options = null, placeholder = "", error = "" }) => {
   return (
     <div>
       <Label htmlFor={id}>{label}</Label>
       {options ? (
         <Select value={value} onValueChange={onChange}>
-          <SelectTrigger>
+          <SelectTrigger className={error ? "border-red-500" : ""}>
             <SelectValue placeholder={placeholder} />
           </SelectTrigger>
           <SelectContent>
@@ -27,8 +27,10 @@ export const FormField = ({ label, id, type = "text", value, onChange, required 
           onChange={(e) => onChange(e.target.value)}
           required={required}
           placeholder={placeholder}
+          className={error ? "border-red-500" : ""}
         />
       )}
+      {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
     </div>
   )
 }

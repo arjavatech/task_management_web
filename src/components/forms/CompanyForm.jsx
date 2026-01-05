@@ -1,196 +1,182 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Button } from '@/components/ui/button'
+import { FormField } from '../common/FormField'
 
-export const CompanyForm = ({ initialData = {}, onSubmit, onCancel, submitText = "Add Company", disabled = false }) => {
+export const CompanyForm = ({ initialData = {}, onSubmit, onCancel, submitText = "Add Company" }) => {
   const [formData, setFormData] = useState({
     name: initialData.name || '',
-    ein: initialData.EIN || initialData.ein || '',
+    ein: initialData.ein || '',
     startDate: initialData.startDate || '',
     stateIncorporated: initialData.stateIncorporated || '',
-    contactName: initialData.contactPersonName || initialData.contactName || '',
-    contactPhone: initialData.contactPersonPhNumber || initialData.contactPhone || '',
+    contactName: initialData.contactName || '',
+    contactPhone: initialData.contactPhone || '',
     address1: initialData.address1 || '',
     address2: initialData.address2 || '',
     city: initialData.city || '',
     state: initialData.state || '',
-    zipCode: initialData.zip || initialData.zipCode || ''
+    zipCode: initialData.zipCode || ''
   })
-  
-  const [errors, setErrors] = useState({})
-  const [isSubmitting, setIsSubmitting] = useState(false)
 
-  const handleChange = (e) => {
-    const { name, value } = e.target
-    setFormData(prev => ({ ...prev, [name]: value }))
+  const [errors, setErrors] = useState({})
+
+  const validateForm = () => {
+    const newErrors = {}
+    
+    if (!formData.name.trim()) newErrors.name = 'Company name is required'
+    
+    if (!formData.ein.trim()) {
+      newErrors.ein = 'EIN is required'
+    } else if (!/^\d{2}-\d{7}$/.test(formData.ein)) {
+      newErrors.ein = 'EIN must be in format XX-XXXXXXX'
+    }
+    
+    if (!formData.startDate) newErrors.startDate = 'Start date is required'
+    
+    if (!formData.stateIncorporated.trim()) newErrors.stateIncorporated = 'State incorporated is required'
+    
+    if (!formData.contactName.trim()) newErrors.contactName = 'Contact name is required'
+    
+    if (!formData.contactPhone.trim()) {
+      newErrors.contactPhone = 'Contact phone is required'
+    } else if (!/^\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}$/.test(formData.contactPhone)) {
+      newErrors.contactPhone = 'Invalid phone number format'
+    }
+    
+    if (!formData.address1.trim()) newErrors.address1 = 'Address is required'
+    if (!formData.city.trim()) newErrors.city = 'City is required'
+    if (!formData.state.trim()) newErrors.state = 'State is required'
+    
+    if (!formData.zipCode.trim()) {
+      newErrors.zipCode = 'Zip code is required'
+    } else if (!/^\d{5}(-\d{4})?$/.test(formData.zipCode)) {
+      newErrors.zipCode = 'Invalid zip code format'
+    }
+    
+    setErrors(newErrors)
+    return Object.keys(newErrors).length === 0
   }
 
-  const handleSubmit = async (e) => {
+  const handleChange = (field, value) => {
+    setFormData(prev => ({ ...prev, [field]: value }))
+    if (errors[field]) {
+      setErrors(prev => ({ ...prev, [field]: '' }))
+    }
+  }
+
+  const handleSubmit = (e) => {
     e.preventDefault()
-    setIsSubmitting(true)
-    try {
-      await onSubmit(formData)
-    } catch (error) {
-      console.error('Form submission error:', error)
-    } finally {
-      setIsSubmitting(false)
+    if (validateForm()) {
+      onSubmit(formData)
     }
   }
 
   return (
-    <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
-      <div className="md:col-span-1">
-        <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">Company Name</label>
-        <input
-          type="text"
-          id="name"
-          name="name"
-          value={formData.name}
-          onChange={handleChange}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          required
-        />
-      </div>
-      
-      <div className="md:col-span-1">
-        <label htmlFor="ein" className="block text-sm font-medium text-gray-700 mb-1">EIN</label>
-        <input
-          type="text"
-          id="ein"
-          name="ein"
-          value={formData.ein}
-          onChange={handleChange}
-          placeholder="XX-XXXXXXX"
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          required
-        />
-      </div>
-      
-      <div className="md:col-span-1">
-        <label htmlFor="startDate" className="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
-        <input
-          type="date"
-          id="startDate"
-          name="startDate"
-          value={formData.startDate}
-          onChange={handleChange}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          required
-        />
-      </div>
-      
-      <div className="md:col-span-1">
-        <label htmlFor="stateIncorporated" className="block text-sm font-medium text-gray-700 mb-1">State Incorporated</label>
-        <input
-          type="text"
-          id="stateIncorporated"
-          name="stateIncorporated"
-          value={formData.stateIncorporated}
-          onChange={handleChange}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          required
-        />
-      </div>
-      
-      <div className="md:col-span-1">
-        <label htmlFor="contactName" className="block text-sm font-medium text-gray-700 mb-1">Contact Person Name</label>
-        <input
-          type="text"
-          id="contactName"
-          name="contactName"
-          value={formData.contactName}
-          onChange={handleChange}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          required
-        />
-      </div>
-      
-      <div className="md:col-span-1">
-        <label htmlFor="contactPhone" className="block text-sm font-medium text-gray-700 mb-1">Contact Person Phone</label>
-        <input
-          type="text"
-          id="contactPhone"
-          name="contactPhone"
-          value={formData.contactPhone}
-          onChange={handleChange}
-          placeholder="(XXX) XXX-XXXX"
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          required
-        />
-      </div>
-      
-      <div className="md:col-span-1">
-        <label htmlFor="address1" className="block text-sm font-medium text-gray-700 mb-1">Address 1</label>
-        <input
-          type="text"
-          id="address1"
-          name="address1"
-          value={formData.address1}
-          onChange={handleChange}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          required
-        />
-      </div>
-      
-      <div className="md:col-span-1">
-        <label htmlFor="address2" className="block text-sm font-medium text-gray-700 mb-1">Address 2</label>
-        <input
-          type="text"
-          id="address2"
-          name="address2"
-          value={formData.address2}
-          onChange={handleChange}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
-      </div>
-      
-      <div className="md:col-span-1">
-        <label htmlFor="city" className="block text-sm font-medium text-gray-700 mb-1">City</label>
-        <input
-          type="text"
-          id="city"
-          name="city"
-          value={formData.city}
-          onChange={handleChange}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          required
-        />
-      </div>
-      
-      <div className="md:col-span-1">
-        <label htmlFor="state" className="block text-sm font-medium text-gray-700 mb-1">State</label>
-        <input
-          type="text"
-          id="state"
-          name="state"
-          value={formData.state}
-          onChange={handleChange}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          required
-        />
-      </div>
-      
-      <div className="md:col-span-1">
-        <label htmlFor="zipCode" className="block text-sm font-medium text-gray-700 mb-1">Zip Code</label>
-        <input
-          type="text"
-          id="zipCode"
-          name="zipCode"
-          value={formData.zipCode}
-          onChange={handleChange}
-          placeholder="XXXXX or XXXXX-XXXX"
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          required
-        />
-      </div>
-      
-      <div className="md:col-span-2 flex flex-col sm:flex-row gap-3 mt-4">
+    <form onSubmit={handleSubmit} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <FormField
+        label="Company Name"
+        id="name"
+        value={formData.name}
+        onChange={(value) => handleChange('name', value)}
+        placeholder="Enter company name"
+        error={errors.name}
+        required
+      />
+      <FormField
+        label="EIN"
+        id="ein"
+        value={formData.ein}
+        onChange={(value) => handleChange('ein', value)}
+        placeholder="XX-XXXXXXX"
+        error={errors.ein}
+        required
+      />
+      <FormField
+        label="Start Date"
+        id="startDate"
+        type="date"
+        value={formData.startDate}
+        onChange={(value) => handleChange('startDate', value)}
+        error={errors.startDate}
+        required
+      />
+      <FormField
+        label="State Incorporated"
+        id="stateIncorporated"
+        value={formData.stateIncorporated}
+        onChange={(value) => handleChange('stateIncorporated', value)}
+        placeholder="e.g., Delaware, California"
+        error={errors.stateIncorporated}
+        required
+      />
+      <FormField
+        label="Contact Person Name"
+        id="contactName"
+        value={formData.contactName}
+        onChange={(value) => handleChange('contactName', value)}
+        placeholder="Enter contact person's full name"
+        error={errors.contactName}
+        required
+      />
+      <FormField
+        label="Contact Person Phone"
+        id="contactPhone"
+        value={formData.contactPhone}
+        onChange={(value) => handleChange('contactPhone', value)}
+        placeholder="(555) 123-4567"
+        error={errors.contactPhone}
+        required
+      />
+      <FormField
+        label="Address 1"
+        id="address1"
+        value={formData.address1}
+        onChange={(value) => handleChange('address1', value)}
+        placeholder="Street address"
+        error={errors.address1}
+        required
+      />
+      <FormField
+        label="Address 2"
+        id="address2"
+        value={formData.address2}
+        onChange={(value) => handleChange('address2', value)}
+        placeholder="Apartment, suite, etc. (optional)"
+      />
+      <FormField
+        label="City"
+        id="city"
+        value={formData.city}
+        onChange={(value) => handleChange('city', value)}
+        placeholder="Enter city"
+        error={errors.city}
+        required
+      />
+      <FormField
+        label="State"
+        id="state"
+        value={formData.state}
+        onChange={(value) => handleChange('state', value)}
+        placeholder="Enter state"
+        error={errors.state}
+        required
+      />
+      <FormField
+        label="Zip Code"
+        id="zipCode"
+        value={formData.zipCode}
+        onChange={(value) => handleChange('zipCode', value)}
+        placeholder="12345"
+        error={errors.zipCode}
+        required
+      />
+      <div className="sm:col-span-2 flex gap-3">
         {onCancel && (
-          <Button type="button" variant="outline" onClick={onCancel} className="flex-1 order-2 sm:order-1" disabled={isSubmitting || disabled}>
+          <Button type="button" variant="outline" onClick={onCancel} className="flex-1">
             Cancel
           </Button>
         )}
-        <Button type="submit" className="flex-1 bg-blue-600 hover:bg-blue-700 order-1 sm:order-2" disabled={isSubmitting || disabled}>
-          {isSubmitting || disabled ? 'Processing...' : submitText}
+        <Button type="submit" className="flex-1 bg-slate-900 hover:bg-slate-800 text-white">
+          {submitText}
         </Button>
       </div>
     </form>

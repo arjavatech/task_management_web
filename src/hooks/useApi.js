@@ -11,10 +11,9 @@ export const useApi = () => {
     try {
       const result = await apiCall()
       
-      // Check if result has success property or if it's a successful response
-      if (result.success === true || (result.success === undefined && result)) {
+      if (result.success) {
         onSuccess?.(result)
-        return { success: true, data: result }
+        return result
       } else {
         const errorMsg = result.error || 'Operation failed'
         setError(errorMsg)

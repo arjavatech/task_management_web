@@ -1,15 +1,15 @@
 import { useState } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams, Link, useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Building2, MapPin, Phone, Mail, Calendar, Edit, Plus, FileText, ArrowLeft, CheckCircle, Clock, AlertCircle, Trash2, BarChart3 } from 'lucide-react'
-import { Modal, SearchBar, StatusBadge, ConfirmModal } from '../components/common'
+import { Modal, SearchBar, StatusBadge, LoadingSpinner, ConfirmModal } from '../components/common'
 import { CompanyForm, TaskForm } from '../components/forms'
 
-export default function CompanyPage({ companies, tasks, onUpdateCompany, onAddTask, onUpdateTask, onDeleteTask, taskTemplates, onAssignTemplate }) {
+export default function CompanyPage({ companies, tasks, onUpdateCompany, onDeleteCompany, onAddTask, onUpdateTask, onDeleteTask, taskTemplates, onAssignTemplate, loading }) {
   const { id } = useParams()
   const navigate = useNavigate()
   const company = companies.find(c => c.id === id)
@@ -19,23 +19,23 @@ export default function CompanyPage({ companies, tasks, onUpdateCompany, onAddTa
   const [editingTask, setEditingTask] = useState(null)
   const [searchTerm, setSearchTerm] = useState('')
   const [showEditModal, setShowEditModal] = useState(false)
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [filterYear, setFilterYear] = useState(0)
   const [filterMonth, setFilterMonth] = useState(0)
-  const [isUpdating, setIsUpdating] = useState(false)
-  const [deleteModal, setDeleteModal] = useState({ show: false, task: null })
 
   if (!company) {
     return <div className="px-4">Company not found</div>
   }
 
-  const handleCompanySubmit = async (formData) => {
-    setIsUpdating(true)
-    try {
-      await onUpdateCompany(company.id, formData)
-      setShowEditModal(false)
-    } finally {
-      setIsUpdating(false)
-    }
+  const handleCompanySubmit = (formData) => {
+    onUpdateCompany(company.id, formData)
+    setShowEditModal(false)
+  }
+
+  const handleDeleteCompany = async () => {
+    await onDeleteCompany(company.id)
+    setShowDeleteModal(false)
+    navigate('/companies')
   }
 
   const handleTaskSubmit = (formData) => {
@@ -65,14 +65,17 @@ export default function CompanyPage({ companies, tasks, onUpdateCompany, onAddTa
   )
 
   return (
-    <div className="p-4 lg:p-8 space-y-6 lg:space-y-8">
+    <>
+      {loading && <LoadingSpinner />}
+      <div className="p-4 lg:p-8 space-y-6 lg:space-y-8">
       {/* Header */}
       <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-4 sm:space-y-0 sm:space-x-4">
-          <Button variant="outline" size="sm" onClick={() => navigate(-1)}>
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back
-          </Button>
+        <div className="flex flex-col lg:flex-row items-start lg:items-center space-y-4 sm:space-y-0 sm:space-x-4">
+          <Link to="/companies" className="self-start">
+            <Button size="lg" className="p-3 mb-3 mt-1" style={{backgroundColor: '#0f172a'}}>
+              <ArrowLeft className="h-6 w-6 text-white" />
+            </Button>
+          </Link>
           <div>
             <h1 className="text-2xl lg:text-4xl font-bold text-gray-900 flex items-center gap-3">
               <Building2 className="h-6 lg:h-8 w-6 lg:w-8 text-blue-600" />
@@ -109,14 +112,14 @@ export default function CompanyPage({ companies, tasks, onUpdateCompany, onAddTa
           </CardContent>
         </Card>
 
-        <Card className="border-l-4 border-l-yellow-500">
-          <CardContent className="p-3 sm:p-4 lg:p-6">
+        <Card className="border-l-4 border-l-slate-900">
+          <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs sm:text-sm font-medium text-gray-600">In Progress</p>
                 <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">{companyTasks.filter(t => t.status === 'In Progress').length}</p>
               </div>
-              <Clock className="h-6 w-6 sm:h-7 sm:w-7 lg:h-8 lg:w-8 text-yellow-500" />
+              <Clock className="h-8 w-8 text-slate-900" />
             </div>
           </CardContent>
         </Card>
@@ -393,10 +396,10 @@ export default function CompanyPage({ companies, tasks, onUpdateCompany, onAddTa
                 </CardTitle>
                 <div className="flex gap-2">
                   <Button variant="outline" size="sm" onClick={() => setShowEditModal(true)}>
-                    <Edit className="h-3 w-3 sm:h-4 sm:w-4" />
+                    <Edit className="h-4 w-4" />
                   </Button>
-                  <Button variant="outline" size="sm" className="text-red-500 hover:text-red-700 hover:bg-red-50 border-red-200">
-                    <Trash2 className="h-3 w-3 sm:h-4 sm:w-4" />
+                  <Button variant="outline" size="sm" onClick={() => setShowDeleteModal(true)} className="text-red-500 hover:text-red-700 hover:bg-red-50 border-red-200">
+                    <Trash2 className="h-4 w-4" />
                   </Button>
                 </div>
               </div>
@@ -412,7 +415,7 @@ export default function CompanyPage({ companies, tasks, onUpdateCompany, onAddTa
                 </div>
                 
                 <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
-                  <Calendar className="h-5 w-5 text-green-600 mt-0.5" />
+                  <Calendar className="h-5 w-5 text-blue-600 mt-0.5" />
                   <div>
                     <p className="font-medium text-gray-900">Start Date</p>
                     <p className="text-gray-600">
@@ -422,7 +425,7 @@ export default function CompanyPage({ companies, tasks, onUpdateCompany, onAddTa
                 </div>
                 
                 <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
-                  <MapPin className="h-5 w-5 text-purple-600 mt-0.5" />
+                  <MapPin className="h-5 w-5 text-blue-600 mt-0.5" />
                   <div>
                     <p className="font-medium text-gray-900">State Incorporated</p>
                     <p className="text-gray-600">{company.stateIncorporated || 'Not provided'}</p>
@@ -430,7 +433,7 @@ export default function CompanyPage({ companies, tasks, onUpdateCompany, onAddTa
                 </div>
                 
                 <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
-                  <Mail className="h-5 w-5 text-indigo-600 mt-0.5" />
+                  <Mail className="h-5 w-5 text-blue-600 mt-0.5" />
                   <div>
                     <p className="font-medium text-gray-900">Contact Person</p>
                     <p className="text-gray-600">{company.contactPersonName || company.contactName || 'Not provided'}</p>
@@ -438,7 +441,7 @@ export default function CompanyPage({ companies, tasks, onUpdateCompany, onAddTa
                 </div>
                 
                 <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
-                  <Phone className="h-5 w-5 text-green-600 mt-0.5" />
+                  <Phone className="h-5 w-5 text-blue-600 mt-0.5" />
                   <div>
                     <p className="font-medium text-gray-900">Phone</p>
                     <p className="text-gray-600">{company.contactPersonPhNumber || company.contactPhone || 'Not provided'}</p>
@@ -471,8 +474,8 @@ export default function CompanyPage({ companies, tasks, onUpdateCompany, onAddTa
                   <FileText className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600" />
                   <span className="text-sm sm:text-xl">Tasks ({filteredTasks.length})</span>
                 </CardTitle>
-                <Button onClick={() => setShowTaskForm(!showTaskForm)} size="sm" className="bg-blue-600 hover:bg-blue-700 w-full sm:w-auto">
-                  <Plus className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
+                <Button onClick={() => setShowTaskForm(!showTaskForm)} size="sm" style={{backgroundColor: '#0f172a', color: 'white'}} className="hover:bg-slate-800">
+                  <Plus className="h-4 w-4 mr-1" />
                   {showTaskForm ? 'Cancel' : 'Add Task'}
                 </Button>
               </div>
@@ -489,7 +492,7 @@ export default function CompanyPage({ companies, tasks, onUpdateCompany, onAddTa
               {showTaskForm && (
                 <div className="mb-6 p-4 bg-gray-50 rounded-lg">
                   <TaskForm
-                    initialData={editingTask}
+                    initialData={editingTask || undefined}
                     onSubmit={handleTaskSubmit}
                     onCancel={() => {
                       setShowTaskForm(false)
@@ -530,8 +533,16 @@ export default function CompanyPage({ companies, tasks, onUpdateCompany, onAddTa
                           <div>
                             <p className="font-medium text-sm lg:text-base">{task.name}</p>
                             <p className="text-xs lg:text-sm text-gray-500">{task.description}</p>
+                            <div className="sm:hidden mt-2 space-y-1">
+                              <StatusBadge status={task.status} />
+                              <p className="text-xs text-gray-500 md:hidden">{task.dueDate}</p>
+                            </div>
                           </div>
                         </TableCell>
+                        <TableCell className="hidden sm:table-cell">
+                          <StatusBadge status={task.status} />
+                        </TableCell>
+                        <TableCell className="hidden md:table-cell">{task.dueDate}</TableCell>
                         <TableCell>
                           <StatusBadge status={task.status} />
                         </TableCell>
@@ -560,38 +571,30 @@ export default function CompanyPage({ companies, tasks, onUpdateCompany, onAddTa
       {/* Edit Company Modal */}
       <Modal
         show={showEditModal}
-        onClose={() => !isUpdating && setShowEditModal(false)}
+        onClose={() => setShowEditModal(false)}
         title="Edit Company"
         description="Update company details"
-        className="max-w-4xl"
+        className="max-w-2xl"
       >
-        {isUpdating && (
-          <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-            <div className="flex items-center gap-2">
-              <div className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
-              <p className="text-blue-800 font-medium">Updating company...</p>
-            </div>
-          </div>
-        )}
         <CompanyForm
           initialData={company}
           onSubmit={handleCompanySubmit}
-          onCancel={() => !isUpdating && setShowEditModal(false)}
+          onCancel={() => setShowEditModal(false)}
           submitText="Save Changes"
         />
       </Modal>
 
-      {/* Delete Task Confirmation Modal */}
+      {/* Delete Company Confirmation Modal */}
       <ConfirmModal
-        show={deleteModal.show}
-        onClose={() => setDeleteModal({ show: false, task: null })}
-        onConfirm={handleDeleteTask}
-        title="Delete Task"
-        message={`Are you sure you want to delete the task "${deleteModal.task?.name}"? This action cannot be undone.`}
-        confirmText="OK"
-        cancelText="Cancel"
+        show={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onConfirm={handleDeleteCompany}
+        title="Delete Company"
+        message={`Are you sure you want to delete "${company.name}"? This will permanently delete the company and all associated tasks. This action cannot be undone.`}
+        confirmText="Delete"
         variant="danger"
       />
-    </div>
+      </div>
+    </>
   )
 }

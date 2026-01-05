@@ -23,7 +23,7 @@ const getCurrentUser = () => {
 
 export const getUserProfile = async (userId) => {
   try {
-    const userDoc = await getDoc(doc(db, 'cm-users-dev', userId))
+    const userDoc = await getDoc(doc(db, 'users', userId))
     if (userDoc.exists()) {
       return { success: true, data: { id: userDoc.id, ...userDoc.data() } }
     } else {
@@ -36,7 +36,7 @@ export const getUserProfile = async (userId) => {
 
 export const updateUserProfile = async (userId, profileData) => {
   try {
-    const userRef = doc(db, 'cm-users-dev', userId)
+    const userRef = doc(db, 'users', userId)
     await updateDoc(userRef, {
       ...profileData,
       updatedAt: serverTimestamp()
@@ -49,38 +49,19 @@ export const updateUserProfile = async (userId, profileData) => {
 
 export const createUserProfile = async (userId, email, name = '') => {
   try {
-    console.log('Creating user profile in cm-users-dev collection for userId:', userId)
-    console.log('Email:', email, 'Name:', name)
-    
-    const userRef = doc(db, 'cm-users-dev', userId)
-    console.log('User reference path:', userRef.path)
-    
-    const userData = {
+    const userRef = doc(db, 'users', userId)
+    await setDoc(userRef, {
       email,
       name,
       phone: '',
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
       isActive: true,
-      profile: {
-        reminderSettings: {
-          enabled: true,
-          daysBefore: 3,
-          timeOfDay: '09:00'
-        },
-        ccEmails: []
-      },
       companyCount: 0,
       taskCount: 0
-    }
-    
-    console.log('About to create user document with data:', userData)
-    await setDoc(userRef, userData)
-    console.log('User profile created successfully in cm-users-dev')
-    
+    })
     return { success: true }
   } catch (error) {
-    console.error('Error creating user profile:', error)
     return { success: false, error: error.message }
   }
 }
@@ -89,7 +70,7 @@ export const createUserProfile = async (userId, email, name = '') => {
 
 export const getCompanies = async (userId) => {
   try {
-    const companiesRef = collection(db, `cm-users-dev/${userId}/companies`)
+    const companiesRef = collection(db, `users/${userId}/companies`)
     const q = query(companiesRef, orderBy('createdAt', 'desc'))
     const querySnapshot = await getDocs(q)
 
@@ -106,7 +87,7 @@ export const getCompanies = async (userId) => {
 
 export const createCompany = async (userId, companyData) => {
   try {
-    const companiesRef = collection(db, `cm-users-dev/${userId}/companies`)
+    const companiesRef = collection(db, `users/${userId}/companies`)
     const docRef = await addDoc(companiesRef, {
       ...companyData,
       createdAt: serverTimestamp(),
@@ -121,7 +102,7 @@ export const createCompany = async (userId, companyData) => {
     })
 
     // Update user's company count
-    const userRef = doc(db, 'cm-users-dev', userId)
+    const userRef = doc(db, 'users', userId)
     const userDoc = await getDoc(userRef)
     if (userDoc.exists()) {
       const currentCount = userDoc.data().companyCount || 0
@@ -136,7 +117,7 @@ export const createCompany = async (userId, companyData) => {
 
 export const updateCompany = async (userId, companyId, companyData) => {
   try {
-    const companyRef = doc(db, `cm-users-dev/${userId}/companies`, companyId)
+    const companyRef = doc(db, `users/${userId}/companies`, companyId)
     await updateDoc(companyRef, {
       ...companyData,
       updatedAt: serverTimestamp()
@@ -149,11 +130,11 @@ export const updateCompany = async (userId, companyId, companyData) => {
 
 export const deleteCompany = async (userId, companyId) => {
   try {
-    const companyRef = doc(db, `cm-users-dev/${userId}/companies`, companyId)
+    const companyRef = doc(db, `users/${userId}/companies`, companyId)
     await deleteDoc(companyRef)
 
     // Update user's company count
-    const userRef = doc(db, 'cm-users-dev', userId)
+    const userRef = doc(db, 'users', userId)
     const userDoc = await getDoc(userRef)
     if (userDoc.exists()) {
       const currentCount = userDoc.data().companyCount || 0
@@ -170,14 +151,14 @@ export const deleteCompany = async (userId, companyId) => {
 
 export const getTasks = async (userId) => {
   try {
-    const companiesRef = collection(db, `cm-users-dev/${userId}/companies`)
+    const companiesRef = collection(db, `users/${userId}/companies`)
     const companiesSnapshot = await getDocs(companiesRef)
 
     let allTasks = []
 
     // Get tasks from all companies
     for (const companyDoc of companiesSnapshot.docs) {
-      const tasksRef = collection(db, `cm-users-dev/${userId}/companies/${companyDoc.id}/tasks`)
+      const tasksRef = collection(db, `users/${userId}/companies/${companyDoc.id}/tasks`)
       const tasksSnapshot = await getDocs(tasksRef)
 
       tasksSnapshot.forEach((taskDoc) => {
@@ -197,7 +178,7 @@ export const getTasks = async (userId) => {
 
 export const getTasksByCompany = async (userId, companyId) => {
   try {
-    const tasksRef = collection(db, `cm-users-dev/${userId}/companies/${companyId}/tasks`)
+    const tasksRef = collection(db, `users/${userId}/companies/${companyId}/tasks`)
     const q = query(tasksRef, orderBy('dueDate', 'asc'))
     const querySnapshot = await getDocs(q)
 
@@ -214,7 +195,7 @@ export const getTasksByCompany = async (userId, companyId) => {
 
 export const createTask = async (userId, companyId, taskData) => {
   try {
-    const tasksRef = collection(db, `cm-users-dev/${userId}/companies/${companyId}/tasks`)
+    const tasksRef = collection(db, `users/${userId}/companies/${companyId}/tasks`)
     const docRef = await addDoc(tasksRef, {
       ...taskData,
       createdAt: serverTimestamp(),
@@ -236,7 +217,7 @@ export const createTask = async (userId, companyId, taskData) => {
 
 export const updateTask = async (userId, companyId, taskId, taskData) => {
   try {
-    const taskRef = doc(db, `cm-users-dev/${userId}/companies/${companyId}/tasks`, taskId)
+    const taskRef = doc(db, `users/${userId}/companies/${companyId}/tasks`, taskId)
     await updateDoc(taskRef, {
       ...taskData,
       updatedAt: serverTimestamp()
@@ -253,7 +234,7 @@ export const updateTask = async (userId, companyId, taskId, taskData) => {
 
 export const deleteTask = async (userId, companyId, taskId) => {
   try {
-    const taskRef = doc(db, `cm-users-dev/${userId}/companies/${companyId}/tasks`, taskId)
+    const taskRef = doc(db, `users/${userId}/companies/${companyId}/tasks`, taskId)
     await deleteDoc(taskRef)
 
     // Update company's task stats
@@ -272,7 +253,7 @@ export const deleteTask = async (userId, companyId, taskId) => {
 
 export const getTaskTemplates = async (userId) => {
   try {
-    const templatesRef = collection(db, `cm-users-dev/${userId}/taskTemplates`)
+    const templatesRef = collection(db, `users/${userId}/taskTemplates`)
     const q = query(templatesRef, orderBy('createdAt', 'desc'))
     const querySnapshot = await getDocs(q)
 
@@ -289,7 +270,7 @@ export const getTaskTemplates = async (userId) => {
 
 export const createTaskTemplate = async (userId, templateData) => {
   try {
-    const templatesRef = collection(db, `cm-users-dev/${userId}/taskTemplates`)
+    const templatesRef = collection(db, `users/${userId}/taskTemplates`)
     const docRef = await addDoc(templatesRef, {
       ...templateData,
       usageCount: 0,
@@ -306,7 +287,7 @@ export const createTaskTemplate = async (userId, templateData) => {
 
 export const deleteTaskTemplate = async (userId, templateId) => {
   try {
-    const templateRef = doc(db, `cm-users-dev/${userId}/taskTemplates`, templateId)
+    const templateRef = doc(db, `users/${userId}/taskTemplates`, templateId)
     await deleteDoc(templateRef)
 
     return { success: true }
@@ -318,7 +299,7 @@ export const deleteTaskTemplate = async (userId, templateId) => {
 export const assignTemplate = async (userId, templateId, assignData) => {
   try {
     const { companyIds, startDate, dueDate } = assignData
-    const templateRef = doc(db, `cm-users-dev/${userId}/taskTemplates`, templateId)
+    const templateRef = doc(db, `users/${userId}/taskTemplates`, templateId)
     const templateDoc = await getDoc(templateRef)
 
     if (!templateDoc.exists()) {
@@ -367,7 +348,7 @@ const updateCompanyTaskStats = async (userId, companyId) => {
       pending: tasks.filter(task => task.status === 'Pending').length
     }
 
-    const companyRef = doc(db, `cm-users-dev/${userId}/companies`, companyId)
+    const companyRef = doc(db, `users/${userId}/companies`, companyId)
     await updateDoc(companyRef, { taskStats: stats })
   } catch (error) {
     console.error('Error updating company task stats:', error)
@@ -380,7 +361,7 @@ const updateUserTaskCount = async (userId) => {
     if (!tasksResult.success) return
 
     const taskCount = tasksResult.data.length
-    const userRef = doc(db, 'cm-users-dev', userId)
+    const userRef = doc(db, 'users', userId)
     await updateDoc(userRef, { taskCount })
   } catch (error) {
     console.error('Error updating user task count:', error)

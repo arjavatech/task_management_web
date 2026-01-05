@@ -5,17 +5,11 @@ export const Modal = ({ show, onClose, title, description, children, className =
   if (!show) return null
 
   return (
-    <div 
-      className="fixed inset-0 backdrop-blur-sm bg-black/50 flex items-center justify-center z-50 p-4"
-      onClick={onClose}
-    >
-      <Card 
-        className={`w-full max-w-md mx-auto max-h-[90vh] overflow-y-auto ${className}`}
-        onClick={(e) => e.stopPropagation()}
-      >
+    <div className="fixed inset-0 backdrop-blur-sm bg-black/50 flex items-center justify-center z-50">
+      <Card className={`w-full max-w-md mx-4 ${className}`}>
         <CardHeader>
-          <CardTitle className="text-lg sm:text-xl">{title}</CardTitle>
-          {description && <CardDescription className="text-sm">{description}</CardDescription>}
+          <CardTitle>{title}</CardTitle>
+          {description && <CardDescription>{description}</CardDescription>}
         </CardHeader>
         <CardContent>
           {children}
@@ -25,27 +19,19 @@ export const Modal = ({ show, onClose, title, description, children, className =
   )
 }
 
-export const ConfirmModal = ({ show, onClose, onConfirm, title, message, confirmText = "Confirm", cancelText = "Cancel", variant = "default", loading = false }) => {
+export const ConfirmModal = ({ show, onClose, onConfirm, title, message, confirmText = "Confirm", cancelText = "Cancel", variant = "default" }) => {
   return (
     <Modal show={show} onClose={onClose} title={title}>
       <p className="text-sm text-gray-600 mb-4">{message}</p>
-      <div className="flex flex-col sm:flex-row gap-3">
-        <Button variant="outline" onClick={onClose} className="flex-1 order-2 sm:order-1" disabled={loading}>
+      <div className="flex gap-3">
+        <Button variant="outline" onClick={onClose} className="flex-1">
           {cancelText}
         </Button>
         <Button 
           onClick={onConfirm} 
-          className={`flex-1 order-1 sm:order-2 ${variant === 'danger' ? 'bg-red-600 hover:bg-red-700 text-white' : 'bg-blue-600 hover:bg-blue-700'}`}
-          disabled={loading}
+          className={`flex-1 ${variant === 'danger' ? 'bg-red-600 hover:bg-red-700 text-white' : 'bg-orange-500 hover:bg-orange-600 text-white'}`}
         >
-          {loading ? (
-            <div className="flex items-center gap-2">
-              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-              {typeof confirmText === 'string' && confirmText.includes('...') ? confirmText : 'Processing...'}
-            </div>
-          ) : (
-            confirmText
-          )}
+          {confirmText}
         </Button>
       </div>
     </Modal>
