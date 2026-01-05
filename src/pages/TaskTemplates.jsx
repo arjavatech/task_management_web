@@ -52,7 +52,7 @@ export default function TaskTemplates({ taskTemplates, onAddTemplate, onAssignTe
     <>
       {loading && <LoadingSpinner />}
       {/* Header Bar */}
-      <div className="bg-white border-b border-gray-200 px-6 lg:px-8 py-6">
+      <div className="hidden xl:block bg-white border-b border-gray-200 px-6 lg:px-8 py-6 xl:mt-0 mt-6">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
             <h1 className="text-3xl font-bold text-gray-900 mb-2">Task Templates</h1>

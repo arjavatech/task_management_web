@@ -1,7 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import { useState, useEffect } from 'react'
 import Login from './pages/Login'
-import Dashboard from './pages/Dashboard2'
+import Dashboard from './pages/Dashboard'
 import CompanyList from './pages/CompanyList'
 import CompanyPage from './pages/CompanyPage'
 import TaskTemplates from './pages/TaskTemplates'

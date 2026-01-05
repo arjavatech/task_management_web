@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { User, Mail, Bell, Settings, Plus, X } from 'lucide-react'
+import { User, Mail, Bell, Plus, X, Edit } from 'lucide-react'
 import { LoadingSpinner } from '../components/common'
 
 export default function UserProfile({ user, onUpdateProfile, loading }) {
@@ -20,6 +20,13 @@ export default function UserProfile({ user, onUpdateProfile, loading }) {
     ccEmails: user.ccEmails || []
   })
   const [newCcEmail, setNewCcEmail] = useState('')
+  const [isEditing, setIsEditing] = useState(false)
+  
+  const hasChanges = () => {
+    return profile.name !== (user.name || '') ||
+           profile.phone !== (user.phone || '') ||
+           JSON.stringify(profile.ccEmails) !== JSON.stringify(user.ccEmails || [])
+  }
 
   const handleSave = () => {
     onUpdateProfile(profile)
@@ -46,7 +53,7 @@ export default function UserProfile({ user, onUpdateProfile, loading }) {
     <>
       {loading && <LoadingSpinner />}
       {/* Header Bar */}
-      <div className="bg-white border-b border-gray-200 px-6 lg:px-8 py-6">
+      <div className="hidden xl:block bg-white border-b border-gray-200 px-6 lg:px-8 py-6 xl:mt-0 mt-8">
         <div>
           <h1 className="text-3xl font-bold text-gray-900 mb-2 flex items-center gap-3">
             <User className="h-8 w-8 text-gray-600" />
@@ -87,6 +94,8 @@ export default function UserProfile({ user, onUpdateProfile, loading }) {
                   value={profile.name}
                   onChange={(e) => setProfile({...profile, name: e.target.value})}
                   placeholder="Enter your full name"
+                  disabled={!isEditing}
+                  className={!isEditing ? "bg-gray-50" : ""}
                 />
               </div>
               
@@ -97,6 +106,8 @@ export default function UserProfile({ user, onUpdateProfile, loading }) {
                   value={profile.phone}
                   onChange={(e) => setProfile({...profile, phone: e.target.value})}
                   placeholder="Enter your phone number"
+                  disabled={!isEditing}
+                  className={!isEditing ? "bg-gray-50" : ""}
                 />
               </div>
             </div>
@@ -122,6 +133,7 @@ export default function UserProfile({ user, onUpdateProfile, loading }) {
                     }
                   })}
                   className={profile.reminderSettings.enabled ? "bg-gray-900 hover:bg-gray-800 text-white" : ""}
+                  disabled={!isEditing}
                 >
                   {profile.reminderSettings.enabled ? 'Enabled' : 'Disabled'}
                 </Button>
@@ -140,6 +152,7 @@ export default function UserProfile({ user, onUpdateProfile, loading }) {
                           daysBefore: parseInt(value)
                         }
                       })}
+                      disabled={!isEditing}
                     >
                       <SelectTrigger>
                         <SelectValue />
@@ -167,6 +180,8 @@ export default function UserProfile({ user, onUpdateProfile, loading }) {
                           timeOfDay: e.target.value
                         }
                       })}
+                      disabled={!isEditing}
+                      className={!isEditing ? "bg-gray-50" : ""}
                     />
                   </div>
                 </>
@@ -188,9 +203,10 @@ export default function UserProfile({ user, onUpdateProfile, loading }) {
                   value={newCcEmail}
                   onChange={(e) => setNewCcEmail(e.target.value)}
                   onKeyPress={(e) => e.key === 'Enter' && addCcEmail()}
-                  className="flex-1"
+                  className={`flex-1 ${!isEditing ? "bg-gray-50" : ""}`}
+                  disabled={!isEditing}
                 />
-                <Button onClick={addCcEmail} disabled={!newCcEmail} className="bg-slate-900 hover:bg-slate-800 text-white">
+                <Button onClick={addCcEmail} disabled={!newCcEmail || !isEditing} className="bg-slate-900 hover:bg-slate-800 text-white">
                   <Plus className="h-4 w-4" />
                   Add
                 </Button>
@@ -208,6 +224,7 @@ export default function UserProfile({ user, onUpdateProfile, loading }) {
                           size="sm"
                           onClick={() => removeCcEmail(email)}
                           className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                          disabled={!isEditing}
                         >
                           <X className="h-4 w-4" />
                         </Button>
@@ -220,12 +237,30 @@ export default function UserProfile({ user, onUpdateProfile, loading }) {
           </div>
         </div>
 
-        {/* Save Button */}
-        <div className="flex justify-end">
-          <Button onClick={handleSave} className="bg-slate-900 hover:bg-slate-800 text-white">
-            <Settings className="h-4 w-4 mr-2" />
-            Save Settings
-          </Button>
+        {/* Action Buttons */}
+        <div className="flex justify-end gap-3">
+          {!isEditing ? (
+            <Button onClick={() => setIsEditing(true)} className="bg-slate-900 hover:bg-slate-800 text-white">
+              <Edit className="h-4 w-4 mr-2" />
+              Edit
+            </Button>
+          ) : (
+            <>
+              <Button 
+                variant="outline" 
+                onClick={() => setIsEditing(false)}
+              >
+                Cancel
+              </Button>
+              <Button 
+                onClick={handleSave} 
+                className="bg-slate-900 hover:bg-slate-800 text-white"
+                disabled={!hasChanges()}
+              >
+                Save
+              </Button>
+            </>
+          )}
         </div>
 
       </div>
