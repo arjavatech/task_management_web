@@ -147,7 +147,7 @@ export default function Layout({ children, user, onLogout }) {
 
       {/* Main Content */}
       <div className="xl:ml-80">
-        <main className="p-3 sm:p-4 lg:p-6 pt-14 sm:pt-16 xl:pt-6 xl:mt-0 mt-6">
+        <main className="p-3 sm:p-4 lg:p-6 pt-14 sm:pt-16 xl:pt-10 xl:mt-0 lg:mt-10 mt-6">
           {children}
         </main>
       </div>

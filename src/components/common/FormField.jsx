@@ -8,7 +8,7 @@ export const FormField = ({ label, id, type = "text", value, onChange, required 
       <Label htmlFor={id}>{label}</Label>
       {options ? (
         <Select value={value} onValueChange={onChange}>
-          <SelectTrigger className={error ? "border-red-500" : ""}>
+          <SelectTrigger className={`mt-2 ${error ? "border-red-500" : ""}`}>
             <SelectValue placeholder={placeholder} />
           </SelectTrigger>
           <SelectContent>
@@ -27,7 +27,7 @@ export const FormField = ({ label, id, type = "text", value, onChange, required 
           onChange={(e) => onChange(e.target.value)}
           required={required}
           placeholder={placeholder}
-          className={error ? "border-red-500" : ""}
+          className={`mt-2 ${error ? "border-red-500" : ""}`}
         />
       )}
       {error && <p className="text-red-500 text-sm mt-1">{error}</p>}

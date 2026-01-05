@@ -57,7 +57,38 @@ export const CompanyForm = ({ initialData = {}, onSubmit, onCancel, submitText =
   }
 
   const handleChange = (field, value) => {
-    setFormData(prev => ({ ...prev, [field]: value }))
+    let formattedValue = value
+    
+    // Format EIN: automatically add dash after 2 digits, limit to 9 digits total
+    if (field === 'ein') {
+      const digits = value.replace(/\D/g, '').slice(0, 9)
+      if (digits.length >= 3) {
+        formattedValue = `${digits.slice(0, 2)}-${digits.slice(2)}`
+      } else {
+        formattedValue = digits
+      }
+    }
+    
+    // Format ZIP: limit to 5 digits only
+    if (field === 'zipCode') {
+      formattedValue = value.replace(/\D/g, '').slice(0, 5)
+    }
+    
+    // Format Phone: (XXX) XXX-XXXX, limit to 10 digits
+    if (field === 'contactPhone') {
+      const digits = value.replace(/\D/g, '').slice(0, 10)
+      if (digits.length >= 7) {
+        formattedValue = `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`
+      } else if (digits.length >= 4) {
+        formattedValue = `(${digits.slice(0, 3)}) ${digits.slice(3)}`
+      } else if (digits.length >= 1) {
+        formattedValue = `(${digits}`
+      } else {
+        formattedValue = digits
+      }
+    }
+    
+    setFormData(prev => ({ ...prev, [field]: formattedValue }))
     if (errors[field]) {
       setErrors(prev => ({ ...prev, [field]: '' }))
     }

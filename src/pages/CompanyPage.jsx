@@ -20,6 +20,7 @@ export default function CompanyPage({ companies, tasks, onUpdateCompany, onDelet
   const [searchTerm, setSearchTerm] = useState('')
   const [showEditModal, setShowEditModal] = useState(false)
   const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [deleteTaskModal, setDeleteTaskModal] = useState({ show: false, task: null })
   const [filterYear, setFilterYear] = useState(0)
   const [filterMonth, setFilterMonth] = useState(0)
 
@@ -36,6 +37,11 @@ export default function CompanyPage({ companies, tasks, onUpdateCompany, onDelet
     await onDeleteCompany(company.id)
     setShowDeleteModal(false)
     navigate('/companies')
+  }
+
+  const handleDeleteTask = () => {
+    onDeleteTask(deleteTaskModal.task.id, company.id)
+    setDeleteTaskModal({ show: false, task: null })
   }
 
   const handleTaskSubmit = (formData) => {
@@ -67,13 +73,13 @@ export default function CompanyPage({ companies, tasks, onUpdateCompany, onDelet
       <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
         <div className="flex flex-col lg:flex-row items-start lg:items-center space-y-4 sm:space-y-0 sm:space-x-4">
           <Link to="/companies" className="self-start">
-            <Button size="lg" className="p-3 mb-3 mt-1" style={{backgroundColor: '#0f172a'}}>
-              <ArrowLeft className="h-6 w-6 text-white" />
+            <Button size="lg" className="p-3 mb-3 mt-1 bg-gray-900 hover:bg-gray-800 text-white">
+              <ArrowLeft className="h-6 w-6" />
             </Button>
           </Link>
           <div>
             <h1 className="text-2xl lg:text-4xl font-bold text-gray-900 flex items-center gap-3">
-              <Building2 className="h-6 lg:h-8 w-6 lg:w-8 text-blue-600" />
+              <Building2 className="h-6 lg:h-8 w-6 lg:w-8 text-slate-600" />
               <span className="break-words">{company.name}</span>
             </h1>
             <p className="text-gray-600 text-base lg:text-lg mt-1">Company Profile & Task Management</p>
@@ -83,14 +89,14 @@ export default function CompanyPage({ companies, tasks, onUpdateCompany, onDelet
 
       {/* Company Overview Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
-        <Card className="border-l-4 border-l-blue-500">
+        <Card className="border-l-4 border-l-slate-600">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">Total Tasks</p>
                 <p className="text-3xl font-bold text-gray-900">{companyTasks.length}</p>
               </div>
-              <FileText className="h-8 w-8 text-blue-500" />
+              <FileText className="h-8 w-8 text-slate-600" />
             </div>
           </CardContent>
         </Card>
@@ -107,14 +113,14 @@ export default function CompanyPage({ companies, tasks, onUpdateCompany, onDelet
           </CardContent>
         </Card>
 
-        <Card className="border-l-4 border-l-slate-900">
+        <Card className="border-l-4 border-l-slate-600">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">In Progress</p>
                 <p className="text-3xl font-bold text-gray-900">{companyTasks.filter(t => t.status === 'In Progress').length}</p>
               </div>
-              <Clock className="h-8 w-8 text-slate-900" />
+              <Clock className="h-8 w-8 text-slate-600" />
             </div>
           </CardContent>
         </Card>
@@ -205,7 +211,7 @@ export default function CompanyPage({ companies, tasks, onUpdateCompany, onDelet
         <Card className="shadow-lg">
           <CardHeader>
             <CardTitle className="text-xl flex items-center gap-2">
-              <BarChart3 className="h-5 w-5 text-blue-600" />
+              <BarChart3 className="h-5 w-5 text-slate-600" />
               Weekly Task Trend
             </CardTitle>
             <CardDescription>Weekly task completion progress</CardDescription>
@@ -253,7 +259,7 @@ export default function CompanyPage({ companies, tasks, onUpdateCompany, onDelet
                             className="w-full rounded" 
                             style={{ 
                               height: `${Math.max((completed / maxHeight) * 200, 5)}px`,
-                              background: 'linear-gradient(to top, #3b82f6, #60a5fa)'
+                              background: 'linear-gradient(to top, #475569, #64748b)'
                             }}
                           />
                         </div>
@@ -266,8 +272,8 @@ export default function CompanyPage({ companies, tasks, onUpdateCompany, onDelet
               </div>
             </div>
             
-            <div className="flex items-center justify-center gap-2 mt-4 text-sm text-blue-600">
-              <div className="w-3 h-3 bg-blue-500 rounded" />
+            <div className="flex items-center justify-center gap-2 mt-4 text-sm text-slate-600">
+              <div className="w-3 h-3 bg-slate-500 rounded" />
               <span>Completed Tasks</span>
             </div>
           </CardContent>
@@ -277,7 +283,7 @@ export default function CompanyPage({ companies, tasks, onUpdateCompany, onDelet
         <Card className="shadow-lg">
           <CardHeader>
             <CardTitle className="text-xl flex items-center gap-2">
-              <BarChart3 className="h-5 w-5 text-blue-600" />
+              <BarChart3 className="h-5 w-5 text-slate-600" />
               Task Status Trend
             </CardTitle>
             <CardDescription>Cumulative completed tasks over time</CardDescription>
@@ -334,12 +340,12 @@ export default function CompanyPage({ companies, tasks, onUpdateCompany, onDelet
                     <svg className="absolute inset-0 w-full h-full">
                       <defs>
                         <linearGradient id="areaGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                          <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.3" />
-                          <stop offset="100%" stopColor="#1e40af" stopOpacity="0.1" />
+                          <stop offset="0%" stopColor="#475569" stopOpacity="0.3" />
+                          <stop offset="100%" stopColor="#334155" stopOpacity="0.1" />
                         </linearGradient>
                       </defs>
                       <path d={areaData} fill="url(#areaGradient)" />
-                      <path d={pathData} stroke="#3b82f6" strokeWidth="3" fill="none" />
+                      <path d={pathData} stroke="#475569" strokeWidth="3" fill="none" />
                       <line 
                         x1={20 + (3 * 40)} 
                         y1="0" 
@@ -365,7 +371,7 @@ export default function CompanyPage({ companies, tasks, onUpdateCompany, onDelet
             
             <div className="flex items-center justify-center gap-4 mt-4 text-sm">
               <div className="flex items-center gap-2">
-                <div className="w-3 h-3 bg-blue-500 rounded" />
+                <div className="w-3 h-3 bg-slate-500 rounded" />
                 <span>Cumulative Progress</span>
               </div>
               <div className="flex items-center gap-2">
@@ -384,7 +390,7 @@ export default function CompanyPage({ companies, tasks, onUpdateCompany, onDelet
             <CardHeader>
               <div className="flex justify-between items-center">
                 <CardTitle className="text-xl flex items-center gap-2">
-                  <Building2 className="h-5 w-5 text-blue-600" />
+                  <Building2 className="h-5 w-5 text-slate-600" />
                   Company Information
                 </CardTitle>
                 <div className="flex gap-2">
@@ -400,7 +406,7 @@ export default function CompanyPage({ companies, tasks, onUpdateCompany, onDelet
             <CardContent className="p-6">
               <div className="space-y-4">
                 <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
-                  <Building2 className="h-5 w-5 text-blue-600 mt-0.5" />
+                  <Building2 className="h-5 w-5 text-slate-600 mt-0.5" />
                   <div>
                     <p className="font-medium text-gray-900">EIN</p>
                     <p className="text-gray-600">{company.ein}</p>
@@ -408,7 +414,7 @@ export default function CompanyPage({ companies, tasks, onUpdateCompany, onDelet
                 </div>
                 
                 <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
-                  <Calendar className="h-5 w-5 text-blue-600 mt-0.5" />
+                  <Calendar className="h-5 w-5 text-slate-600 mt-0.5" />
                   <div>
                     <p className="font-medium text-gray-900">Start Date</p>
                     <p className="text-gray-600">{new Date(company.startDate).toLocaleDateString()}</p>
@@ -416,7 +422,7 @@ export default function CompanyPage({ companies, tasks, onUpdateCompany, onDelet
                 </div>
                 
                 <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
-                  <MapPin className="h-5 w-5 text-blue-600 mt-0.5" />
+                  <MapPin className="h-5 w-5 text-slate-600 mt-0.5" />
                   <div>
                     <p className="font-medium text-gray-900">State Incorporated</p>
                     <p className="text-gray-600">{company.stateIncorporated}</p>
@@ -424,7 +430,7 @@ export default function CompanyPage({ companies, tasks, onUpdateCompany, onDelet
                 </div>
                 
                 <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
-                  <Mail className="h-5 w-5 text-blue-600 mt-0.5" />
+                  <Mail className="h-5 w-5 text-slate-600 mt-0.5" />
                   <div>
                     <p className="font-medium text-gray-900">Contact Person</p>
                     <p className="text-gray-600">{company.contactName}</p>
@@ -432,7 +438,7 @@ export default function CompanyPage({ companies, tasks, onUpdateCompany, onDelet
                 </div>
                 
                 <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
-                  <Phone className="h-5 w-5 text-blue-600 mt-0.5" />
+                  <Phone className="h-5 w-5 text-slate-600 mt-0.5" />
                   <div>
                     <p className="font-medium text-gray-900">Phone</p>
                     <p className="text-gray-600">{company.contactPhone}</p>
@@ -449,10 +455,10 @@ export default function CompanyPage({ companies, tasks, onUpdateCompany, onDelet
             <CardHeader>
               <div className="flex justify-between items-center">
                 <CardTitle className="text-xl flex items-center gap-2">
-                  <FileText className="h-5 w-5 text-blue-600" />
+                  <FileText className="h-5 w-5 text-slate-600" />
                   Tasks ({filteredTasks.length})
                 </CardTitle>
-                <Button onClick={() => setShowTaskForm(!showTaskForm)} size="sm" style={{backgroundColor: '#0f172a', color: 'white'}} className="hover:bg-slate-800">
+                <Button onClick={() => setShowTaskForm(!showTaskForm)} size="sm" className="bg-gray-900 hover:bg-gray-800 text-white">
                   <Plus className="h-4 w-4 mr-1" />
                   {showTaskForm ? 'Cancel' : 'Add Task'}
                 </Button>
@@ -526,7 +532,7 @@ export default function CompanyPage({ companies, tasks, onUpdateCompany, onDelet
                             <Button variant="outline" size="sm" onClick={() => startEditTask(task)}>
                               <Edit className="h-4 w-4" />
                             </Button>
-                            <Button variant="outline" size="sm" onClick={() => onDeleteTask(task.id, company.id)}>
+                            <Button variant="outline" size="sm" onClick={() => setDeleteTaskModal({ show: true, task })}>
                               <Trash2 className="h-4 w-4" />
                             </Button>
                           </div>
@@ -565,6 +571,17 @@ export default function CompanyPage({ companies, tasks, onUpdateCompany, onDelet
         onConfirm={handleDeleteCompany}
         title="Delete Company"
         message={`Are you sure you want to delete "${company.name}"? This will permanently delete the company and all associated tasks. This action cannot be undone.`}
+        confirmText="Delete"
+        variant="danger"
+      />
+
+      {/* Delete Task Confirmation Modal */}
+      <ConfirmModal
+        show={deleteTaskModal.show}
+        onClose={() => setDeleteTaskModal({ show: false, task: null })}
+        onConfirm={handleDeleteTask}
+        title="Delete Task"
+        message={`Are you sure you want to delete the task "${deleteTaskModal.task?.name}"? This action cannot be undone.`}
         confirmText="Delete"
         variant="danger"
       />
