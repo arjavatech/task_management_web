@@ -93,7 +93,7 @@ function AppContent() {
 
   // Load data when user logs in and auth is ready
   useEffect(() => {
-    if (user && userProfile && authReady) {
+    if (user && authReady) {
       loadData()
     } else if (!user) {
       // Clear data when user logs out
@@ -101,7 +101,7 @@ function AppContent() {
       setTasks([])
       setTaskTemplates([])
     }
-  }, [user, userProfile, authReady])
+  }, [user, authReady])
 
   const logout = async () => {
     setShowConfirmSignout(true)
@@ -211,6 +211,7 @@ function AppContent() {
             </Layout>
           ) : <Navigate to="/login" />
         } />
+        <Route path="*" element={<Navigate to={user ? "/dashboard" : "/login"} />} />
       </Routes>
 
       {/* Data Loading Overlay */}

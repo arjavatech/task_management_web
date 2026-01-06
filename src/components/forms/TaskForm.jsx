@@ -33,6 +33,7 @@ export const TaskForm = ({ initialData = {}, onSubmit, onCancel, submitText = "A
         id="name"
         value={formData.name}
         onChange={(value) => handleChange('name', value)}
+        placeholder="Enter task name"
         required
       />
       <FormField
@@ -40,6 +41,7 @@ export const TaskForm = ({ initialData = {}, onSubmit, onCancel, submitText = "A
         id="description"
         value={formData.description}
         onChange={(value) => handleChange('description', value)}
+        placeholder="Enter task description"
       />
       <FormField
         label="Due Date"
@@ -54,6 +56,7 @@ export const TaskForm = ({ initialData = {}, onSubmit, onCancel, submitText = "A
         value={formData.status}
         onChange={(value) => handleChange('status', value)}
         options={statusOptions}
+        placeholder="Select status"
       />
       <div className="flex gap-3">
         {onCancel && (
@@ -61,7 +64,7 @@ export const TaskForm = ({ initialData = {}, onSubmit, onCancel, submitText = "A
             Cancel
           </Button>
         )}
-        <Button type="submit" style={{backgroundColor: '#fcd500', color: 'black'}} className="flex-1 hover:bg-orange-600 text-white">
+        <Button type="submit" className="flex-1 bg-slate-900 hover:bg-slate-800 text-white">
           {submitText}
         </Button>
       </div>

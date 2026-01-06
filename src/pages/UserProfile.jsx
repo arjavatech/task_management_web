@@ -1,6 +1,5 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -21,16 +20,29 @@ export default function UserProfile({ user, onUpdateProfile, loading }) {
   })
   const [newCcEmail, setNewCcEmail] = useState('')
   const [isEditing, setIsEditing] = useState(false)
+  const [showToast, setShowToast] = useState(false)
   
   const hasChanges = () => {
     return profile.name !== (user.name || '') ||
            profile.phone !== (user.phone || '') ||
-           JSON.stringify(profile.ccEmails) !== JSON.stringify(user.ccEmails || [])
+           JSON.stringify(profile.ccEmails) !== JSON.stringify(user.ccEmails || []) ||
+           JSON.stringify(profile.reminderSettings) !== JSON.stringify(user.reminderSettings || {enabled: true, daysBefore: 3, timeOfDay: '12:00'})
   }
 
   const handleSave = () => {
     onUpdateProfile(profile)
+    setIsEditing(false)
+    setShowToast(true)
   }
+
+  useEffect(() => {
+    if (showToast) {
+      const timer = setTimeout(() => {
+        setShowToast(false)
+      }, 3000)
+      return () => clearTimeout(timer)
+    }
+  }, [showToast])
 
   const addCcEmail = () => {
     if (newCcEmail && !profile.ccEmails.includes(newCcEmail)) {
@@ -307,6 +319,19 @@ export default function UserProfile({ user, onUpdateProfile, loading }) {
             >
               Save
             </Button>
+          </div>
+        )}
+
+        {/* Toast Message */}
+        {showToast && (
+          <div className="fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg z-50 flex items-center gap-2">
+            <span>Profile updated successfully!</span>
+            <button 
+              onClick={() => setShowToast(false)}
+              className="ml-2 text-white hover:text-gray-200"
+            >
+              <X className="h-4 w-4" />
+            </button>
           </div>
         )}
 

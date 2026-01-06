@@ -16,6 +16,7 @@ export default function CompanyPage({ companies, tasks, onUpdateCompany, onDelet
   const companyTasks = tasks.filter(t => t.companyId === id)
   
   const [showTaskForm, setShowTaskForm] = useState(false)
+  const [showAddTaskModal, setShowAddTaskModal] = useState(false)
   const [editingTask, setEditingTask] = useState(null)
   const [searchTerm, setSearchTerm] = useState('')
   const [showEditModal, setShowEditModal] = useState(false)
@@ -48,10 +49,11 @@ export default function CompanyPage({ companies, tasks, onUpdateCompany, onDelet
     if (editingTask) {
       onUpdateTask(editingTask.id, company.id, formData)
       setEditingTask(null)
+      setShowTaskForm(false)
     } else {
       onAddTask(company.id, formData)
+      setShowAddTaskModal(false)
     }
-    setShowTaskForm(false)
   }
 
   const startEditTask = (task) => {
@@ -68,92 +70,92 @@ export default function CompanyPage({ companies, tasks, onUpdateCompany, onDelet
   return (
     <>
       {loading && <LoadingSpinner />}
-      <div className="p-4 lg:p-8 space-y-6 lg:space-y-8">
+      <div className="p-3 sm:p-4 lg:p-8 space-y-4 sm:space-y-6 lg:space-y-8">
       {/* Header */}
-      <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
-        <div className="flex flex-col lg:flex-row items-start lg:items-center space-y-4 sm:space-y-0 sm:space-x-4">
-          <Link to="/companies" className="self-start">
-            <Button size="lg" className="p-3 mb-3 mt-1 bg-gray-900 hover:bg-gray-800 text-white">
-              <ArrowLeft className="h-6 w-6" />
+      <div className="flex flex-col space-y-4">
+        <div className="flex items-center space-x-3">
+          <Link to="/companies">
+            <Button size="sm" className="p-2 bg-slate-900 hover:bg-slate-800 text-white">
+              <ArrowLeft className="h-4 w-4 sm:h-5 sm:w-5" />
             </Button>
           </Link>
-          <div>
-            <h1 className="text-2xl lg:text-4xl font-bold text-gray-900 flex items-center gap-3">
-              <Building2 className="h-6 lg:h-8 w-6 lg:w-8 text-slate-600" />
-              <span className="break-words">{company.name}</span>
+          <div className="flex-1 min-w-0">
+            <h1 className="text-lg sm:text-xl md:text-2xl lg:text-4xl font-bold text-gray-900 flex items-center gap-2 sm:gap-3">
+              <Building2 className="h-5 w-5 sm:h-6 sm:w-6 lg:h-8 lg:w-8 text-slate-600 flex-shrink-0" />
+              <span className="truncate">{company.name}</span>
             </h1>
-            <p className="text-gray-600 text-base lg:text-lg mt-1">Company Profile & Task Management</p>
+            <p className="text-gray-600 text-sm sm:text-base lg:text-lg mt-1">Company Profile & Task Management</p>
           </div>
         </div>
       </div>
 
       {/* Company Overview Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
-        <Card className="border-l-4 border-l-slate-600">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Total Tasks</p>
-                <p className="text-3xl font-bold text-gray-900">{companyTasks.length}</p>
-              </div>
-              <FileText className="h-8 w-8 text-slate-600" />
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
+        <div className="bg-white rounded-lg sm:rounded-xl shadow-sm border border-gray-100 p-3 sm:p-6 hover:shadow-md transition-shadow">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+            <div className="mb-2 sm:mb-0">
+              <p className="text-xs sm:text-sm font-medium text-gray-500 mb-1 sm:mb-2">Total Tasks</p>
+              <p className="text-xl sm:text-3xl font-bold text-gray-900">{companyTasks.length}</p>
             </div>
-          </CardContent>
-        </Card>
+            <div className="w-8 h-8 sm:w-12 sm:h-12 bg-slate-900 rounded-lg flex items-center justify-center self-end sm:self-auto">
+              <FileText className="h-4 w-4 sm:h-6 sm:w-6 text-white" />
+            </div>
+          </div>
+        </div>
 
-        <Card className="border-l-4 border-l-green-500">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Completed</p>
-                <p className="text-3xl font-bold text-gray-900">{companyTasks.filter(t => t.status === 'Done').length}</p>
-              </div>
-              <CheckCircle className="h-8 w-8 text-green-500" />
+        <div className="bg-white rounded-lg sm:rounded-xl shadow-sm border border-gray-100 p-3 sm:p-6 hover:shadow-md transition-shadow">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+            <div className="mb-2 sm:mb-0">
+              <p className="text-xs sm:text-sm font-medium text-gray-500 mb-1 sm:mb-2">Completed</p>
+              <p className="text-xl sm:text-3xl font-bold text-gray-900">{companyTasks.filter(t => t.status === 'Done').length}</p>
             </div>
-          </CardContent>
-        </Card>
+            <div className="w-8 h-8 sm:w-12 sm:h-12 bg-green-50 rounded-lg flex items-center justify-center self-end sm:self-auto">
+              <CheckCircle className="h-4 w-4 sm:h-6 sm:w-6 text-green-600" />
+            </div>
+          </div>
+        </div>
 
-        <Card className="border-l-4 border-l-slate-600">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">In Progress</p>
-                <p className="text-3xl font-bold text-gray-900">{companyTasks.filter(t => t.status === 'In Progress').length}</p>
-              </div>
-              <Clock className="h-8 w-8 text-slate-600" />
+        <div className="bg-white rounded-lg sm:rounded-xl shadow-sm border border-gray-100 p-3 sm:p-6 hover:shadow-md transition-shadow">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+            <div className="mb-2 sm:mb-0">
+              <p className="text-xs sm:text-sm font-medium text-gray-500 mb-1 sm:mb-2">In Progress</p>
+              <p className="text-xl sm:text-3xl font-bold text-gray-900">{companyTasks.filter(t => t.status === 'In Progress').length}</p>
             </div>
-          </CardContent>
-        </Card>
+            <div className="w-8 h-8 sm:w-12 sm:h-12 bg-blue-50 rounded-lg flex items-center justify-center self-end sm:self-auto">
+              <Clock className="h-4 w-4 sm:h-6 sm:w-6 text-blue-600" />
+            </div>
+          </div>
+        </div>
 
-        <Card className="border-l-4 border-l-red-500">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Overdue</p>
-                <p className="text-3xl font-bold text-gray-900">
-                  {companyTasks.filter(t => {
-                    if (!t.dueDate || t.status === 'Done') return false
-                    return new Date(t.dueDate) < new Date()
-                  }).length || 0}
-                </p>
-              </div>
-              <AlertCircle className="h-8 w-8 text-red-500" />
+        <div className="bg-white rounded-lg sm:rounded-xl shadow-sm border border-gray-100 p-3 sm:p-6 hover:shadow-md transition-shadow">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+            <div className="mb-2 sm:mb-0">
+              <p className="text-xs sm:text-sm font-medium text-gray-500 mb-1 sm:mb-2">Overdue</p>
+              <p className="text-xl sm:text-3xl font-bold text-gray-900">
+                {companyTasks.filter(t => {
+                  if (!t.dueDate || t.status === 'Done') return false
+                  return new Date(t.dueDate) < new Date()
+                }).length || 0}
+              </p>
             </div>
-          </CardContent>
-        </Card>
+            <div className="w-8 h-8 sm:w-12 sm:h-12 bg-red-50 rounded-lg flex items-center justify-center self-end sm:self-auto">
+              <AlertCircle className="h-4 w-4 sm:h-6 sm:w-6 text-red-600" />
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Chart Filters */}
       <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">Chart Filters</CardTitle>
+        <CardHeader className="pb-3 sm:pb-6">
+          <CardTitle className="text-base sm:text-lg">Chart Filters</CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-end">
-            <div>
-              <Label htmlFor="filterYear">Year</Label>
+        <CardContent className="pt-0">
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 items-start sm:items-end">
+            <div className="w-full sm:w-auto">
+              <Label htmlFor="filterYear" className="text-sm">Year</Label>
               <Select value={filterYear.toString()} onValueChange={(value) => setFilterYear(parseInt(value))}>
-                <SelectTrigger className="w-32">
+                <SelectTrigger className="w-full sm:w-32">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -164,10 +166,10 @@ export default function CompanyPage({ companies, tasks, onUpdateCompany, onDelet
                 </SelectContent>
               </Select>
             </div>
-            <div>
-              <Label htmlFor="filterMonth">Month</Label>
+            <div className="w-full sm:w-auto">
+              <Label htmlFor="filterMonth" className="text-sm">Month</Label>
               <Select value={filterMonth.toString()} onValueChange={(value) => setFilterMonth(parseInt(value))}>
-                <SelectTrigger className="w-40">
+                <SelectTrigger className="w-full sm:w-40">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -191,7 +193,7 @@ export default function CompanyPage({ companies, tasks, onUpdateCompany, onDelet
                 </SelectContent>
               </Select>
             </div>
-            <div className="text-sm text-gray-600">
+            <div className="text-xs sm:text-sm text-gray-600 mt-2 sm:mt-0">
               Filtered: {companyTasks.filter(task => {
                 if (!task.dueDate) return false
                 const taskDate = new Date(task.dueDate)
@@ -206,18 +208,18 @@ export default function CompanyPage({ companies, tasks, onUpdateCompany, onDelet
       </Card>
 
       {/* Modern Charts */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-8">
         {/* Weekly Task Trend Chart */}
         <Card className="shadow-lg">
-          <CardHeader>
-            <CardTitle className="text-xl flex items-center gap-2">
-              <BarChart3 className="h-5 w-5 text-slate-600" />
+          <CardHeader className="pb-3 sm:pb-6">
+            <CardTitle className="text-base sm:text-lg lg:text-xl flex items-center gap-2">
+              <BarChart3 className="h-4 w-4 sm:h-5 sm:w-5 text-slate-600" />
               Weekly Task Trend
             </CardTitle>
-            <CardDescription>Weekly task completion progress</CardDescription>
+            <CardDescription className="text-sm">Weekly task completion progress</CardDescription>
           </CardHeader>
-          <CardContent>
-            <div className="relative h-64">
+          <CardContent className="p-3 sm:p-6">
+            <div className="relative h-48 sm:h-64">
               <div className="absolute left-0 top-0 h-full flex flex-col justify-between text-xs text-gray-400 pr-2">
                 <span>10</span>
                 <span>8</span>
@@ -227,7 +229,7 @@ export default function CompanyPage({ companies, tasks, onUpdateCompany, onDelet
                 <span>0</span>
               </div>
               
-              <div className="ml-8 h-full flex items-end justify-between px-4">
+              <div className="ml-4 sm:ml-6 lg:ml-8 h-full flex items-end justify-between px-1 sm:px-2 lg:px-4">
                 {(() => {
                   // Filter tasks by selected year and month
                   const filteredTasks = companyTasks.filter(task => {
@@ -253,17 +255,17 @@ export default function CompanyPage({ companies, tasks, onUpdateCompany, onDelet
                     const maxHeight = 10
                     
                     return (
-                      <div key={day} className="flex flex-col items-center space-y-2">
-                        <div className="flex flex-col items-center w-8">
+                      <div key={day} className="flex flex-col items-center space-y-1 sm:space-y-2">
+                        <div className="flex flex-col items-center w-4 sm:w-6 lg:w-8">
                           <div 
                             className="w-full rounded" 
                             style={{ 
-                              height: `${Math.max((completed / maxHeight) * 200, 5)}px`,
+                              height: `${Math.max((completed / maxHeight) * 160, 4)}px`,
                               background: 'linear-gradient(to top, #475569, #64748b)'
                             }}
                           />
                         </div>
-                        <span className="text-xs font-medium text-gray-600">{day}</span>
+                        <span className="text-xs font-medium text-gray-600">{day.slice(0, 1)}</span>
                         <span className="text-xs text-gray-400">{completed}</span>
                       </div>
                     )
@@ -272,8 +274,8 @@ export default function CompanyPage({ companies, tasks, onUpdateCompany, onDelet
               </div>
             </div>
             
-            <div className="flex items-center justify-center gap-2 mt-4 text-sm text-slate-600">
-              <div className="w-3 h-3 bg-slate-500 rounded" />
+            <div className="flex items-center justify-center gap-2 mt-3 sm:mt-4 text-xs sm:text-sm text-slate-600">
+              <div className="w-2 h-2 sm:w-3 sm:h-3 bg-slate-500 rounded" />
               <span>Completed Tasks</span>
             </div>
           </CardContent>
@@ -281,15 +283,15 @@ export default function CompanyPage({ companies, tasks, onUpdateCompany, onDelet
 
         {/* Task Status Line Chart */}
         <Card className="shadow-lg">
-          <CardHeader>
-            <CardTitle className="text-xl flex items-center gap-2">
-              <BarChart3 className="h-5 w-5 text-slate-600" />
+          <CardHeader className="pb-3 sm:pb-6">
+            <CardTitle className="text-base sm:text-lg lg:text-xl flex items-center gap-2">
+              <BarChart3 className="h-4 w-4 sm:h-5 sm:w-5 text-slate-600" />
               Task Status Trend
             </CardTitle>
-            <CardDescription>Cumulative completed tasks over time</CardDescription>
+            <CardDescription className="text-sm">Cumulative completed tasks over time</CardDescription>
           </CardHeader>
-          <CardContent>
-            <div className="relative h-64">
+          <CardContent className="p-3 sm:p-6">
+            <div className="relative h-48 sm:h-64">
               <div className="absolute left-0 top-0 h-full flex flex-col justify-between text-xs text-gray-400 pr-2">
                 <span>20</span>
                 <span>15</span>
@@ -298,7 +300,7 @@ export default function CompanyPage({ companies, tasks, onUpdateCompany, onDelet
                 <span>0</span>
               </div>
               
-              <div className="ml-8 h-full relative">
+              <div className="ml-4 sm:ml-6 lg:ml-8 h-full relative">
                 {(() => {
                   // Filter tasks by selected year and month
                   const filteredTasks = companyTasks.filter(task => {
@@ -328,13 +330,13 @@ export default function CompanyPage({ companies, tasks, onUpdateCompany, onDelet
                     ).length
                     cumulative += dayCompleted
                     cumulativePoints.push({
-                      x: 20 + (i * 40),
-                      y: 200 - ((cumulative / maxCompleted) * 180)
+                      x: 15 + (i * 30),
+                      y: 160 - ((cumulative / maxCompleted) * 140)
                     })
                   }
                   
                   const pathData = `M ${cumulativePoints.map(p => `${p.x} ${p.y}`).join(' L ')}`
-                  const areaData = `${pathData} L ${cumulativePoints[cumulativePoints.length - 1].x} 220 L 20 220 Z`
+                  const areaData = `${pathData} L ${cumulativePoints[cumulativePoints.length - 1].x} 180 L 15 180 Z`
                   
                   return (
                     <svg className="absolute inset-0 w-full h-full">
@@ -345,23 +347,28 @@ export default function CompanyPage({ companies, tasks, onUpdateCompany, onDelet
                         </linearGradient>
                       </defs>
                       <path d={areaData} fill="url(#areaGradient)" />
-                      <path d={pathData} stroke="#475569" strokeWidth="3" fill="none" />
+                      <path d={pathData} stroke="#475569" strokeWidth="2" fill="none" />
                       <line 
-                        x1={20 + (3 * 40)} 
+                        x1={15 + (3 * 30)} 
                         y1="0" 
-                        x2={20 + (3 * 40)} 
-                        y2="220" 
+                        x2={15 + (3 * 30)} 
+                        y2="180" 
                         stroke="#ef4444" 
-                        strokeWidth="2" 
-                        strokeDasharray="5,5"
+                        strokeWidth="1.5" 
+                        strokeDasharray="4,4"
                       />
                     </svg>
                   )
                 })()}
                 
-                <div className="absolute bottom-0 w-full flex justify-between px-4 text-xs text-gray-600">
+                <div className="absolute bottom-0 w-full flex justify-between px-2 sm:px-4 text-xs text-gray-600">
                   {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day, index) => (
-                    <span key={day} className={index === 3 ? 'text-red-500 font-semibold' : ''}>
+                    <span key={day} className={`${index === 3 ? 'text-red-500 font-semibold' : ''} hidden sm:inline`}>
+                      {day}
+                    </span>
+                  ))}
+                  {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day, index) => (
+                    <span key={day} className={`${index === 3 ? 'text-red-500 font-semibold' : ''} sm:hidden`}>
                       {day}
                     </span>
                   ))}
@@ -369,13 +376,13 @@ export default function CompanyPage({ companies, tasks, onUpdateCompany, onDelet
               </div>
             </div>
             
-            <div className="flex items-center justify-center gap-4 mt-4 text-sm">
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 bg-slate-500 rounded" />
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-4 mt-3 sm:mt-4 text-xs sm:text-sm">
+              <div className="flex items-center gap-1 sm:gap-2">
+                <div className="w-2 h-2 sm:w-3 sm:h-3 bg-slate-500 rounded" />
                 <span>Cumulative Progress</span>
               </div>
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-0.5 bg-red-500" style={{ borderStyle: 'dashed' }} />
+              <div className="flex items-center gap-1 sm:gap-2">
+                <div className="w-2 h-0.5 sm:w-3 sm:h-0.5 bg-red-500" style={{ borderStyle: 'dashed' }} />
                 <span>Current Day</span>
               </div>
             </div>
@@ -383,65 +390,65 @@ export default function CompanyPage({ companies, tasks, onUpdateCompany, onDelet
         </Card>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
         {/* Company Information */}
         <div className="lg:col-span-1">
           <Card className="h-fit">
-            <CardHeader>
-              <div className="flex justify-between items-center">
-                <CardTitle className="text-xl flex items-center gap-2">
-                  <Building2 className="h-5 w-5 text-slate-600" />
+            <CardHeader >
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-0">
+                <CardTitle className="text-base sm:text-lg lg:text-xl flex items-center gap-2">
+                  <Building2 className="h-4 w-4 sm:h-5 sm:w-5 text-slate-600" />
                   Company Information
                 </CardTitle>
                 <div className="flex gap-2">
                   <Button variant="outline" size="sm" onClick={() => setShowEditModal(true)}>
-                    <Edit className="h-4 w-4" />
+                    <Edit className="h-3 w-3 sm:h-4 sm:w-4" />
                   </Button>
                   <Button variant="outline" size="sm" onClick={() => setShowDeleteModal(true)} className="text-red-500 hover:text-red-700 hover:bg-red-50 border-red-200">
-                    <Trash2 className="h-4 w-4" />
+                    <Trash2 className="h-3 w-3 sm:h-4 sm:w-4" />
                   </Button>
                 </div>
               </div>
             </CardHeader>
-            <CardContent className="p-6">
-              <div className="space-y-4">
-                <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
-                  <Building2 className="h-5 w-5 text-slate-600 mt-0.5" />
-                  <div>
-                    <p className="font-medium text-gray-900">EIN</p>
-                    <p className="text-gray-600">{company.ein}</p>
+            <CardContent className="p-3 sm:p-6">
+              <div className="space-y-3 sm:space-y-4">
+                <div className="flex items-start gap-2 sm:gap-3 p-2 sm:p-3 bg-gray-50 rounded-lg">
+                  <Building2 className="h-4 w-4 sm:h-5 sm:w-5 text-slate-600 mt-0.5 flex-shrink-0" />
+                  <div className="min-w-0">
+                    <p className="font-medium text-gray-900 text-sm sm:text-base">EIN</p>
+                    <p className="text-gray-600 text-sm break-all">{company.ein}</p>
                   </div>
                 </div>
                 
-                <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
-                  <Calendar className="h-5 w-5 text-slate-600 mt-0.5" />
-                  <div>
-                    <p className="font-medium text-gray-900">Start Date</p>
-                    <p className="text-gray-600">{new Date(company.startDate).toLocaleDateString()}</p>
+                <div className="flex items-start gap-2 sm:gap-3 p-2 sm:p-3 bg-gray-50 rounded-lg">
+                  <Calendar className="h-4 w-4 sm:h-5 sm:w-5 text-slate-600 mt-0.5 flex-shrink-0" />
+                  <div className="min-w-0">
+                    <p className="font-medium text-gray-900 text-sm sm:text-base">Start Date</p>
+                    <p className="text-gray-600 text-sm">{new Date(company.startDate).toLocaleDateString()}</p>
                   </div>
                 </div>
                 
-                <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
-                  <MapPin className="h-5 w-5 text-slate-600 mt-0.5" />
-                  <div>
-                    <p className="font-medium text-gray-900">State Incorporated</p>
-                    <p className="text-gray-600">{company.stateIncorporated}</p>
+                <div className="flex items-start gap-2 sm:gap-3 p-2 sm:p-3 bg-gray-50 rounded-lg">
+                  <MapPin className="h-4 w-4 sm:h-5 sm:w-5 text-slate-600 mt-0.5 flex-shrink-0" />
+                  <div className="min-w-0">
+                    <p className="font-medium text-gray-900 text-sm sm:text-base">State Incorporated</p>
+                    <p className="text-gray-600 text-sm">{company.stateIncorporated}</p>
                   </div>
                 </div>
                 
-                <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
-                  <Mail className="h-5 w-5 text-slate-600 mt-0.5" />
-                  <div>
-                    <p className="font-medium text-gray-900">Contact Person</p>
-                    <p className="text-gray-600">{company.contactName}</p>
+                <div className="flex items-start gap-2 sm:gap-3 p-2 sm:p-3 bg-gray-50 rounded-lg">
+                  <Mail className="h-4 w-4 sm:h-5 sm:w-5 text-slate-600 mt-0.5 flex-shrink-0" />
+                  <div className="min-w-0">
+                    <p className="font-medium text-gray-900 text-sm sm:text-base">Contact Person</p>
+                    <p className="text-gray-600 text-sm break-words">{company.contactName}</p>
                   </div>
                 </div>
                 
-                <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
-                  <Phone className="h-5 w-5 text-slate-600 mt-0.5" />
-                  <div>
-                    <p className="font-medium text-gray-900">Phone</p>
-                    <p className="text-gray-600">{company.contactPhone}</p>
+                <div className="flex items-start gap-2 sm:gap-3 p-2 sm:p-3 bg-gray-50 rounded-lg">
+                  <Phone className="h-4 w-4 sm:h-5 sm:w-5 text-slate-600 mt-0.5 flex-shrink-0" />
+                  <div className="min-w-0">
+                    <p className="font-medium text-gray-900 text-sm sm:text-base">Phone</p>
+                    <p className="text-gray-600 text-sm">{company.contactPhone}</p>
                   </div>
                 </div>
               </div>
@@ -452,51 +459,37 @@ export default function CompanyPage({ companies, tasks, onUpdateCompany, onDelet
         {/* Tasks Section */}
         <div className="lg:col-span-2">
           <Card>
-            <CardHeader>
-              <div className="flex justify-between items-center">
-                <CardTitle className="text-xl flex items-center gap-2">
-                  <FileText className="h-5 w-5 text-slate-600" />
+            <CardHeader className="pb-3 sm:pb-6">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-0">
+                <CardTitle className="text-base sm:text-lg lg:text-xl flex items-center gap-2">
+                  <FileText className="h-4 w-4 sm:h-5 sm:w-5 text-slate-600" />
                   Tasks ({filteredTasks.length})
                 </CardTitle>
-                <Button onClick={() => setShowTaskForm(!showTaskForm)} size="sm" className="bg-gray-900 hover:bg-gray-800 text-white">
-                  <Plus className="h-4 w-4 mr-1" />
-                  {showTaskForm ? 'Cancel' : 'Add Task'}
+                <Button onClick={() => setShowAddTaskModal(true)} size="sm" className="bg-slate-900 hover:bg-slate-800 text-white w-full sm:w-auto">
+                  <Plus className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
+                  <span className="text-sm">Add Task</span>
                 </Button>
               </div>
               {/* Search Bar */}
-              <div className="mt-4">
+              <div className="mt-3 sm:mt-4">
                 <SearchBar
                   value={searchTerm}
                   onChange={setSearchTerm}
-                  placeholder="Search tasks by name, description, or status..."
+                  placeholder="Search tasks..."
                 />
               </div>
             </CardHeader>
-            <CardContent>
-              {showTaskForm && (
-                <div className="mb-6 p-4 bg-gray-50 rounded-lg">
-                  <TaskForm
-                    initialData={editingTask || undefined}
-                    onSubmit={handleTaskSubmit}
-                    onCancel={() => {
-                      setShowTaskForm(false)
-                      setEditingTask(null)
-                    }}
-                    submitText={editingTask ? 'Update Task' : 'Add Task'}
-                  />
-                </div>
-              )}
-
+            <CardContent className="p-3 sm:p-6">
               {filteredTasks.length === 0 ? (
-                <div className="text-center py-8">
-                  <FileText className="h-12 w-12 text-gray-300 mx-auto mb-4" />
+                <div className="text-center py-6 sm:py-8">
+                  <FileText className="h-8 w-8 sm:h-12 sm:w-12 text-gray-300 mx-auto mb-3 sm:mb-4" />
                   {searchTerm ? (
                     <>
-                      <p className="text-gray-500">No tasks found matching your search.</p>
-                      <p className="text-gray-400 text-sm">Try adjusting your search terms</p>
+                      <p className="text-gray-500 text-sm sm:text-base">No tasks found matching your search.</p>
+                      <p className="text-gray-400 text-xs sm:text-sm">Try adjusting your search terms</p>
                     </>
                   ) : (
-                    <p className="text-gray-500">No tasks assigned to this company yet.</p>
+                    <p className="text-gray-500 text-sm sm:text-base">No tasks assigned to this company yet.</p>
                   )}
                 </div>
               ) : (
@@ -529,11 +522,11 @@ export default function CompanyPage({ companies, tasks, onUpdateCompany, onDelet
                         <TableCell className="hidden md:table-cell">{task.dueDate}</TableCell>
                         <TableCell>
                           <div className="flex flex-col sm:flex-row gap-1 sm:gap-2">
-                            <Button variant="outline" size="sm" onClick={() => startEditTask(task)}>
-                              <Edit className="h-4 w-4" />
+                            <Button variant="outline" size="sm" onClick={() => startEditTask(task)} className="text-xs sm:text-sm">
+                              <Edit className="h-3 w-3 sm:h-4 sm:w-4" />
                             </Button>
-                            <Button variant="outline" size="sm" onClick={() => setDeleteTaskModal({ show: true, task })}>
-                              <Trash2 className="h-4 w-4" />
+                            <Button variant="outline" size="sm" onClick={() => setDeleteTaskModal({ show: true, task })} className="text-xs sm:text-sm">
+                              <Trash2 className="h-3 w-3 sm:h-4 sm:w-4" />
                             </Button>
                           </div>
                         </TableCell>
@@ -548,13 +541,50 @@ export default function CompanyPage({ companies, tasks, onUpdateCompany, onDelet
         </div>
       </div>
 
+      {/* Add Task Modal */}
+      <Modal
+        show={showAddTaskModal}
+        onClose={() => setShowAddTaskModal(false)}
+        title="Add New Task"
+        description="Create a new task for this company"
+        className="max-w-xs sm:max-w-lg lg:max-w-2xl mx-4 sm:mx-0"
+      >
+        <TaskForm
+          onSubmit={handleTaskSubmit}
+          onCancel={() => setShowAddTaskModal(false)}
+          submitText="Add Task"
+        />
+      </Modal>
+
+      {/* Edit Task Modal */}
+      <Modal
+        show={showTaskForm}
+        onClose={() => {
+          setShowTaskForm(false)
+          setEditingTask(null)
+        }}
+        title="Edit Task"
+        description="Update task details"
+        className="max-w-xs sm:max-w-lg lg:max-w-2xl mx-4 sm:mx-0"
+      >
+        <TaskForm
+          initialData={editingTask || undefined}
+          onSubmit={handleTaskSubmit}
+          onCancel={() => {
+            setShowTaskForm(false)
+            setEditingTask(null)
+          }}
+          submitText="Update Task"
+        />
+      </Modal>
+
       {/* Edit Company Modal */}
       <Modal
         show={showEditModal}
         onClose={() => setShowEditModal(false)}
         title="Edit Company"
         description="Update company details"
-        className="max-w-2xl"
+        className="max-w-xs sm:max-w-lg lg:max-w-2xl mx-4 sm:mx-0"
       >
         <CompanyForm
           initialData={company}
