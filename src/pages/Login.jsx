@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { loginUser, registerUser } from '../firebase/config'
 import { useAuth } from '../contexts/AuthContext'
-import { Building2, Mail, Lock, LogIn, UserPlus, AlertCircle, ArrowRight, CheckCircle, Users, Target } from 'lucide-react'
+import { Building2, Mail, Lock, LogIn, UserPlus, AlertCircle, ArrowRight, CheckCircle, Users, Target, Eye, EyeOff } from 'lucide-react'
 
 export default function Login() {
   const [isSignUp, setIsSignUp] = useState(false)
@@ -16,6 +16,7 @@ export default function Login() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [message, setMessage] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
 
   const navigate = useNavigate()
   const { user } = useAuth()
@@ -85,12 +86,12 @@ export default function Login() {
       `,
       backgroundSize: '100px 100px, 100px 100px, 100% 100%'
     }}>
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="max-w-7xl w-full flex">
+      <div className="min-h-screen flex items-center justify-center p-4">
+        <div className="max-w-7xl w-full flex flex-col lg:flex-row">
           {/* LEFT SIDE */}
-          <div className="flex-1 flex flex-col justify-center px-8 lg:px-12">
+          <div className="hidden lg:flex flex-1 flex-col justify-center px-4 sm:px-8 lg:px-12 mb-8 lg:mb-0">
             {/* Logo & App Name */}
-            <div className="flex items-center gap-3 mb-16">
+            <div className="flex items-center gap-3 mb-8 lg:mb-16">
               <div className="w-10 h-10 bg-slate-900 rounded-lg flex items-center justify-center">
                 <Building2 className="w-6 h-6 text-white" />
               </div>
@@ -99,48 +100,48 @@ export default function Login() {
 
             <div className="max-w-lg">
               {/* Bold Title */}
-              <h1 className="text-5xl lg:text-6xl font-bold text-white mb-6 leading-tight">
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold text-white mb-4 lg:mb-6 leading-tight">
                 Streamline Your Task Management
               </h1>
               
               {/* Supporting Paragraph */}
-              <p className="text-xl text-slate-300 mb-12 leading-relaxed">
+              <p className="text-lg sm:text-xl text-slate-300 mb-8 lg:mb-12 leading-relaxed">
                 Powerful task management platform designed for modern teams. Organize, track, and complete projects with ease.
               </p>
 
               {/* Statistics Boxes */}
-              <div className="grid grid-cols-2 gap-6">
-                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20">
-                  <div className="flex items-center gap-3 mb-2">
-                    <Users className="w-6 h-6 text-slate-300" />
-                    <span className="text-2xl font-bold text-white">500+</span>
+              <div className="grid grid-cols-2 gap-4 lg:gap-6">
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 lg:p-6 border border-white/20">
+                  <div className="flex items-center gap-2 lg:gap-3 mb-2">
+                    <Users className="w-5 h-5 lg:w-6 lg:h-6 text-slate-300" />
+                    <span className="text-xl lg:text-2xl font-bold text-white">500+</span>
                   </div>
-                  <p className="text-slate-300">Companies Managed</p>
+                  <p className="text-sm lg:text-base text-slate-300">Companies Managed</p>
                 </div>
-                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20">
-                  <div className="flex items-center gap-3 mb-2">
-                    <Target className="w-6 h-6 text-slate-300" />
-                    <span className="text-2xl font-bold text-white">10K+</span>
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 lg:p-6 border border-white/20">
+                  <div className="flex items-center gap-2 lg:gap-3 mb-2">
+                    <Target className="w-5 h-5 lg:w-6 lg:h-6 text-slate-300" />
+                    <span className="text-xl lg:text-2xl font-bold text-white">10K+</span>
                   </div>
-                  <p className="text-slate-300">Tasks Completed</p>
+                  <p className="text-sm lg:text-base text-slate-300">Tasks Completed</p>
                 </div>
               </div>
             </div>
           </div>
 
           {/* RIGHT SIDE */}
-          <div className="flex-1 flex items-center justify-center px-8">
+          <div className="flex-1 flex items-center justify-center px-4 sm:px-8">
             <div className="w-full max-w-md">
               <Card className="bg-slate-900 border-slate-800 shadow-2xl rounded-2xl">
-                <CardHeader className="text-center pb-10 pt-10">
-                  <CardTitle className="text-3xl font-bold text-white mb-3">
+                <CardHeader className="text-center pb-6 lg:pb-10 pt-6 lg:pt-10">
+                  <CardTitle className="text-2xl lg:text-3xl font-bold text-white mb-3">
                     Welcome Back
                   </CardTitle>
-                  <CardDescription className="text-slate-400 text-lg">
+                  <CardDescription className="text-slate-400 text-base lg:text-lg">
                     Sign in to access your dashboard
                   </CardDescription>
                 </CardHeader>
-                <CardContent className="px-10 pb-10">
+                <CardContent className="px-6 sm:px-10 pb-6 lg:pb-10">
                 <form onSubmit={handleSubmit} className="space-y-6">
                   {isSignUp && (
                     <div className="space-y-2">
@@ -179,13 +180,22 @@ export default function Login() {
                       <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
                       <Input
                         id="password"
-                        type="password"
+                        type={showPassword ? "text" : "password"}
                         placeholder={isSignUp ? 'Create a password' : 'Enter your password'}
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
-                        className="pl-10 bg-slate-800 border-slate-700 text-white placeholder:text-slate-500"
+                        onCopy={(e) => e.preventDefault()}
+                        onPaste={(e) => e.preventDefault()}
+                        className="pl-10 pr-10 bg-slate-800 border-slate-700 text-white placeholder:text-slate-500"
                         required
                       />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-500 hover:text-slate-400"
+                      >
+                        {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
                     </div>
                   </div>
 

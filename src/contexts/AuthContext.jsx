@@ -9,30 +9,41 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null)
   const [userProfile, setUserProfile] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [authReady, setAuthReady] = useState(false)
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (authUser) => {
+      setLoading(true)
       setUser(authUser)
 
       if (authUser) {
-        // Get or create user profile
-        const profileResult = await getUserProfile(authUser.uid)
+        try {
+          // Ensure token is fresh
+          await authUser.getIdToken(true)
+          
+          // Get or create user profile
+          const profileResult = await getUserProfile(authUser.uid)
 
-        if (profileResult.success) {
-          setUserProfile(profileResult.data)
-        } else {
-          // Create profile if it doesn't exist
-          await createUserProfile(authUser.uid, authUser.email, authUser.displayName || '')
-          const newProfileResult = await getUserProfile(authUser.uid)
-          if (newProfileResult.success) {
-            setUserProfile(newProfileResult.data)
+          if (profileResult.success) {
+            setUserProfile(profileResult.data)
+          } else {
+            // Create profile if it doesn't exist
+            await createUserProfile(authUser.uid, authUser.email, authUser.displayName || '')
+            const newProfileResult = await getUserProfile(authUser.uid)
+            if (newProfileResult.success) {
+              setUserProfile(newProfileResult.data)
+            }
           }
+        } catch (error) {
+          console.error('Auth setup error:', error)
+          setUserProfile(null)
         }
       } else {
         setUserProfile(null)
       }
 
       setLoading(false)
+      setAuthReady(true)
     })
 
     return unsubscribe
@@ -58,12 +69,13 @@ export function AuthProvider({ children }) {
     user,
     userProfile,
     loading,
+    authReady,
     updateUserProfile
   }
 
   return (
     <AuthContext.Provider value={value}>
-      {!loading && children}
+      {authReady && children}
     </AuthContext.Provider>
   )
 }

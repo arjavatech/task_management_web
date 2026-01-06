@@ -1,6 +1,6 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app"
-import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from "firebase/auth"
+import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, setPersistence, browserSessionPersistence } from "firebase/auth"
 import { getFirestore, collection, doc, addDoc, updateDoc, deleteDoc, getDoc, getDocs, query, where, orderBy, limit } from "firebase/firestore"
 
 // Firebase Configuration from environment variables
@@ -19,6 +19,16 @@ const app = initializeApp(firebaseConfig)
 // Initialize Firebase services
 export const auth = getAuth(app)
 export const db = getFirestore(app)
+
+// Set session-only persistence to auto-logout when app is closed
+setPersistence(auth, browserSessionPersistence).catch((error) => {
+  console.error('Failed to set auth persistence:', error)
+})
+
+// Auto-logout when window is closed
+window.addEventListener('beforeunload', () => {
+  signOut(auth).catch(() => {})
+})
 
 // Authentication functions
 export const loginUser = async (email, password) => {
