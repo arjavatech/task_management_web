@@ -74,11 +74,9 @@ export default function CompanyPage({ companies, tasks, onUpdateCompany, onDelet
       {/* Header */}
       <div className="flex flex-col space-y-4">
         <div className="flex items-center space-x-3">
-          <Link to="/companies">
-            <Button size="sm" className="p-2 bg-slate-900 hover:bg-slate-800 text-white">
-              <ArrowLeft className="h-4 w-4 sm:h-5 sm:w-5" />
-            </Button>
-          </Link>
+          <Button size="sm" className="p-2 bg-slate-900 hover:bg-slate-800 text-white" onClick={() => navigate(-1)}>
+            <ArrowLeft className="h-4 w-4 sm:h-5 sm:w-5" />
+          </Button>
           <div className="flex-1 min-w-0">
             <h1 className="text-lg sm:text-xl md:text-2xl lg:text-4xl font-bold text-gray-900 flex items-center gap-2 sm:gap-3">
               <Building2 className="h-5 w-5 sm:h-6 sm:w-6 lg:h-8 lg:w-8 text-slate-600 flex-shrink-0" />

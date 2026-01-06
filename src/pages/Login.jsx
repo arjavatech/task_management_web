@@ -12,11 +12,13 @@ export default function Login() {
   const [isSignUp, setIsSignUp] = useState(false)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
   const [name, setName] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [message, setMessage] = useState('')
   const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
 
   const navigate = useNavigate()
   const { user } = useAuth()
@@ -45,12 +47,19 @@ export default function Login() {
 
     try {
       if (isSignUp) {
+        // Validate password match
+        if (password !== confirmPassword) {
+          setError('Passwords do not match')
+          setLoading(false)
+          return
+        }
         // Sign up
         const result = await registerUser(email, password)
         if (result.success) {
           setMessage('Account created successfully! You can now sign in.')
           setIsSignUp(false)
           setPassword('') // Clear password for security
+          setConfirmPassword('')
         } else {
           setError(result.error)
         }
@@ -75,17 +84,11 @@ export default function Login() {
     setError('')
     setMessage('')
     setPassword('')
+    setConfirmPassword('')
   }
 
   return (
-    <div className="min-h-screen" style={{
-      backgroundImage: `
-        radial-gradient(circle at 25px 25px, rgba(255,255,255,0.1) 2px, transparent 0),
-        radial-gradient(circle at 75px 75px, rgba(255,255,255,0.1) 2px, transparent 0),
-        linear-gradient(135deg, #1e293b 0%, #0f172a 100%)
-      `,
-      backgroundSize: '100px 100px, 100px 100px, 100% 100%'
-    }}>
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 to-slate-800">
       <div className="min-h-screen flex items-center justify-center p-4">
         <div className="max-w-7xl w-full flex flex-col lg:flex-row">
           {/* LEFT SIDE */}
@@ -198,6 +201,32 @@ export default function Login() {
                       </button>
                     </div>
                   </div>
+
+                  {isSignUp && (
+                    <div className="space-y-2">
+                      <div className="relative">
+                        <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-4 h-4" />
+                        <Input
+                          id="confirmPassword"
+                          type={showConfirmPassword ? "text" : "password"}
+                          placeholder="Confirm your password"
+                          value={confirmPassword}
+                          onChange={(e) => setConfirmPassword(e.target.value)}
+                          onCopy={(e) => e.preventDefault()}
+                          onPaste={(e) => e.preventDefault()}
+                          className="pl-10 pr-10 bg-slate-800 border-slate-700 text-white placeholder:text-slate-500"
+                          required={isSignUp}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                          className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-500 hover:text-slate-400"
+                        >
+                          {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                        </button>
+                      </div>
+                    </div>
+                  )}
 
                   {error && (
                     <div className="flex items-center gap-2 p-3 bg-red-900/50 border border-red-800 rounded-lg">

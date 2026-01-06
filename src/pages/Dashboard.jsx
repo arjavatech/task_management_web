@@ -145,7 +145,7 @@ export default function Dashboard2({ tasks, companies }) {
             </Link>
             
             {companies.length > 0 && (
-              <Link to={`/company/${companies[0].id}`} className="block">
+              <Link to="/task-templates" className="block">
                 <div className="flex items-center gap-3 p-3 sm:p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
                   <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gray-100 rounded-lg flex items-center justify-center">
                     <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5 text-gray-600" />
@@ -235,16 +235,17 @@ export default function Dashboard2({ tasks, companies }) {
                       const progressPercentage = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0
                       
                       return (
-                        <div key={company.id} className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                          <div className="flex items-center gap-3 mb-4">
-                            <div className="w-10 h-10 bg-slate-900 rounded-lg flex items-center justify-center">
-                              <Building2 className="h-5 w-5 text-white" />
+                        <Link key={company.id} to={`/company/${company.id}`} className="block">
+                          <div className="bg-gray-50 rounded-lg p-4 border border-gray-200 hover:bg-gray-100 transition-colors cursor-pointer">
+                            <div className="flex items-center gap-3 mb-4">
+                              <div className="w-10 h-10 bg-slate-900 rounded-lg flex items-center justify-center">
+                                <Building2 className="h-5 w-5 text-white" />
+                              </div>
+                              <div className="flex-1">
+                                <p className="font-medium text-gray-900">{company.name}</p>
+                                <p className="text-sm text-gray-500">{company.contactName}</p>
+                              </div>
                             </div>
-                            <div className="flex-1">
-                              <p className="font-medium text-gray-900">{company.name}</p>
-                              <p className="text-sm text-gray-500">{company.contactName}</p>
-                            </div>
-                          </div>
                           
                           <div className="grid grid-cols-2 gap-4 mb-4">
                             <div className="text-center">
@@ -277,13 +278,8 @@ export default function Dashboard2({ tasks, companies }) {
                               />
                             </div>
                           </div>
-                          
-                          <Link to={`/company/${company.id}`} className="block">
-                            <Button variant="outline" size="sm" className="w-full">
-                              View Details
-                            </Button>
-                          </Link>
-                        </div>
+                          </div>
+                        </Link>
                       )
                     })}
                 </div>
@@ -333,11 +329,15 @@ export default function Dashboard2({ tasks, companies }) {
                           <tr key={company.id} className="border-b border-gray-100 hover:bg-gray-50">
                             <td className="py-4 px-4">
                               <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 bg-slate-900 rounded-lg flex items-center justify-center">
-                                  <Building2 className="h-5 w-5 text-white" />
-                                </div>
+                                <Link to={`/company/${company.id}`}>
+                                  <div className="w-10 h-10 bg-slate-900 rounded-lg flex items-center justify-center cursor-pointer hover:bg-slate-800 transition-colors">
+                                    <Building2 className="h-5 w-5 text-white" />
+                                  </div>
+                                </Link>
                                 <div>
-                                  <p className="font-medium text-gray-900">{company.name}</p>
+                                  <Link to={`/company/${company.id}`} className="hover:text-gray-700">
+                                    <p className="font-medium text-gray-900">{company.name}</p>
+                                  </Link>
                                   <p className="text-sm text-gray-500">{company.contactName}</p>
                                 </div>
                               </div>
@@ -423,12 +423,13 @@ export default function Dashboard2({ tasks, companies }) {
                       const daysUntilDue = Math.ceil((new Date(task.dueDate) - new Date()) / (1000 * 60 * 60 * 24))
                       
                       return (
-                        <div key={task.id} className={`flex flex-col sm:flex-row sm:items-center sm:justify-between p-3 sm:p-4 rounded-lg border-l-4 hover:bg-gray-50 transition-colors gap-3 sm:gap-0 ${
-                          isOverdue ? 'border-l-red-500 bg-red-50' :
-                          task.status === 'Done' ? 'border-l-green-500 bg-green-50' :
-                          task.status === 'In Progress' ? 'border-l-blue-500 bg-blue-50' :
-                          'border-l-gray-300 bg-white'
-                        }`}>
+                        <Link key={task.id} to={`/company/${task.companyId}`} className="block">
+                          <div className={`flex flex-col sm:flex-row sm:items-center sm:justify-between p-3 sm:p-4 rounded-lg border-l-4 hover:bg-gray-50 transition-colors gap-3 sm:gap-0 cursor-pointer ${
+                            isOverdue ? 'border-l-red-500 bg-red-50' :
+                            task.status === 'Done' ? 'border-l-green-500 bg-green-50' :
+                            task.status === 'In Progress' ? 'border-l-blue-500 bg-blue-50' :
+                            'border-l-gray-300 bg-white'
+                          }`}>
                           <div className="flex-1 min-w-0">
                             <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mb-2">
                               <h4 className="font-medium text-gray-900 truncate">{task.name}</h4>
@@ -478,6 +479,7 @@ export default function Dashboard2({ tasks, companies }) {
                             </span>
                           </div>
                         </div>
+                      </Link>
                       )
                     })}
                   </div>
