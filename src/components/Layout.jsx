@@ -127,7 +127,7 @@ export default function Layout({ children, user, onLogout }) {
             </div>
             <Button 
               onClick={onLogout} 
-              className="w-full bg-red-600 hover:bg-red-700 text-white border-0 transition-all duration-200 text-xs sm:text-sm"
+              className="w-full bg-slate-700 hover:bg-slate-600 text-white border-0 transition-all duration-200 text-xs sm:text-sm"
               size="sm"
             >
               <LogOut className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />

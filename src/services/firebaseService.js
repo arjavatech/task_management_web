@@ -19,16 +19,40 @@ const getCurrentUser = () => {
   return auth.currentUser
 }
 
+// Retry helper for Firebase operations
+const retryOperation = async (operation, maxRetries = 3, delay = 1000) => {
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      return await operation()
+    } catch (error) {
+      if (attempt === maxRetries) {
+        throw error
+      }
+      
+      // Don't retry on permission errors
+      if (error.code === 'permission-denied' || error.code === 'unauthenticated') {
+        throw error
+      }
+      
+      // Wait before retrying
+      await new Promise(resolve => setTimeout(resolve, delay * attempt))
+    }
+  }
+}
+
 // ===== USER OPERATIONS =====
 
 export const getUserProfile = async (userId) => {
   try {
-    const userDoc = await getDoc(doc(db, 'users', userId))
-    if (userDoc.exists()) {
-      return { success: true, data: { id: userDoc.id, ...userDoc.data() } }
-    } else {
-      return { success: false, error: 'User profile not found' }
-    }
+    const result = await retryOperation(async () => {
+      const userDoc = await getDoc(doc(db, 'users', userId))
+      if (userDoc.exists()) {
+        return { success: true, data: { id: userDoc.id, ...userDoc.data() } }
+      } else {
+        return { success: false, error: 'User profile not found' }
+      }
+    })
+    return result
   } catch (error) {
     return { success: false, error: error.message }
   }
@@ -70,16 +94,19 @@ export const createUserProfile = async (userId, email, name = '') => {
 
 export const getCompanies = async (userId) => {
   try {
-    const companiesRef = collection(db, `users/${userId}/companies`)
-    const q = query(companiesRef, orderBy('createdAt', 'desc'))
-    const querySnapshot = await getDocs(q)
+    const result = await retryOperation(async () => {
+      const companiesRef = collection(db, `users/${userId}/companies`)
+      const q = query(companiesRef, orderBy('createdAt', 'desc'))
+      const querySnapshot = await getDocs(q)
 
-    const companies = []
-    querySnapshot.forEach((doc) => {
-      companies.push({ id: doc.id, ...doc.data() })
+      const companies = []
+      querySnapshot.forEach((doc) => {
+        companies.push({ id: doc.id, ...doc.data() })
+      })
+
+      return { success: true, data: companies }
     })
-
-    return { success: true, data: companies }
+    return result
   } catch (error) {
     return { success: false, error: error.message }
   }
@@ -151,26 +178,29 @@ export const deleteCompany = async (userId, companyId) => {
 
 export const getTasks = async (userId) => {
   try {
-    const companiesRef = collection(db, `users/${userId}/companies`)
-    const companiesSnapshot = await getDocs(companiesRef)
+    const result = await retryOperation(async () => {
+      const companiesRef = collection(db, `users/${userId}/companies`)
+      const companiesSnapshot = await getDocs(companiesRef)
 
-    let allTasks = []
+      let allTasks = []
 
-    // Get tasks from all companies
-    for (const companyDoc of companiesSnapshot.docs) {
-      const tasksRef = collection(db, `users/${userId}/companies/${companyDoc.id}/tasks`)
-      const tasksSnapshot = await getDocs(tasksRef)
+      // Get tasks from all companies
+      for (const companyDoc of companiesSnapshot.docs) {
+        const tasksRef = collection(db, `users/${userId}/companies/${companyDoc.id}/tasks`)
+        const tasksSnapshot = await getDocs(tasksRef)
 
-      tasksSnapshot.forEach((taskDoc) => {
-        allTasks.push({
-          id: taskDoc.id,
-          companyId: companyDoc.id,
-          ...taskDoc.data()
+        tasksSnapshot.forEach((taskDoc) => {
+          allTasks.push({
+            id: taskDoc.id,
+            companyId: companyDoc.id,
+            ...taskDoc.data()
+          })
         })
-      })
-    }
+      }
 
-    return { success: true, data: allTasks }
+      return { success: true, data: allTasks }
+    })
+    return result
   } catch (error) {
     return { success: false, error: error.message }
   }
@@ -253,16 +283,19 @@ export const deleteTask = async (userId, companyId, taskId) => {
 
 export const getTaskTemplates = async (userId) => {
   try {
-    const templatesRef = collection(db, `users/${userId}/taskTemplates`)
-    const q = query(templatesRef, orderBy('createdAt', 'desc'))
-    const querySnapshot = await getDocs(q)
+    const result = await retryOperation(async () => {
+      const templatesRef = collection(db, `users/${userId}/taskTemplates`)
+      const q = query(templatesRef, orderBy('createdAt', 'desc'))
+      const querySnapshot = await getDocs(q)
 
-    const templates = []
-    querySnapshot.forEach((doc) => {
-      templates.push({ id: doc.id, ...doc.data() })
+      const templates = []
+      querySnapshot.forEach((doc) => {
+        templates.push({ id: doc.id, ...doc.data() })
+      })
+
+      return { success: true, data: templates }
     })
-
-    return { success: true, data: templates }
+    return result
   } catch (error) {
     return { success: false, error: error.message }
   }

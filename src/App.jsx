@@ -10,13 +10,14 @@ import Layout from './components/Layout'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
 import { logoutUser } from './firebase/config'
 import { getCompanies, getTasks, getTaskTemplates } from './services/firebaseService'
-import { useCompanies, useTasks, useTemplates } from './hooks'
+import { useCompanies, useTasks, useTemplates, useConnectionStatus } from './hooks'
 import { LoadingSpinner } from './components/common'
 import { Button } from '@/components/ui/button'
-import { LogOut } from 'lucide-react'
+import { LogOut, Wifi, WifiOff } from 'lucide-react'
 
 function AppContent() {
-  const { user, userProfile, loading, updateUserProfile } = useAuth()
+  const { user, userProfile, loading, authReady, updateUserProfile } = useAuth()
+  const { isOnline, connectionIssue } = useConnectionStatus()
   const [companies, setCompanies] = useState([])
   const [tasks, setTasks] = useState([])
   const [taskTemplates, setTaskTemplates] = useState([])
@@ -40,6 +41,11 @@ function AppContent() {
     setDataLoading(true)
     try {
       console.log('Loading data for user:', user.uid)
+
+      // Check connection before loading
+      if (!isOnline) {
+        throw new Error('No internet connection. Please check your network and try again.')
+      }
 
       // Load all data in parallel
       const [companiesResult, tasksResult, templatesResult] = await Promise.all([
@@ -85,17 +91,17 @@ function AppContent() {
   const { addTask, editTask, removeTask, loading: tasksLoading } = useTasks(loadData, showModal)
   const { addTemplate, removeTemplate, assignTemplateToCompanies, loading: templatesLoading } = useTemplates(loadData, showModal)
 
-  // Load data when user logs in
+  // Load data when user logs in and auth is ready
   useEffect(() => {
-    if (user && userProfile) {
+    if (user && userProfile && authReady) {
       loadData()
-    } else {
+    } else if (!user) {
       // Clear data when user logs out
       setCompanies([])
       setTasks([])
       setTaskTemplates([])
     }
-  }, [user, userProfile])
+  }, [user, userProfile, authReady])
 
   const logout = async () => {
     setShowConfirmSignout(true)
@@ -209,6 +215,9 @@ function AppContent() {
 
       {/* Data Loading Overlay */}
       {dataLoading && <LoadingSpinner />}
+
+      {/* Connection Status Indicator */}
+     
 
       {/* Global Toast */}
       {modal.show && modal.type === 'success' && (
