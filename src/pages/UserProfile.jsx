@@ -54,12 +54,20 @@ export default function UserProfile({ user, onUpdateProfile, loading }) {
       {loading && <LoadingSpinner />}
       {/* Header Bar */}
       <div className="hidden xl:block bg-white border-b border-gray-200 px-6 lg:px-8 py-6 xl:mt-0 mt-8">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2 flex items-center gap-3">
-            <User className="h-8 w-8 text-gray-600" />
-            User Profile
-          </h1>
-          <p className="text-gray-600">Manage your account settings and notification preferences</p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900 mb-2 flex items-center gap-3">
+              <User className="h-8 w-8 text-gray-600" />
+              User Profile
+            </h1>
+            <p className="text-gray-600">Manage your account settings and notification preferences</p>
+          </div>
+          {!isEditing && (
+            <Button onClick={() => setIsEditing(true)} className="bg-slate-900 hover:bg-slate-800 text-white">
+              <Edit className="h-4 w-4 mr-2" />
+              Edit
+            </Button>
+          )}
         </div>
       </div>
 
@@ -238,30 +246,23 @@ export default function UserProfile({ user, onUpdateProfile, loading }) {
         </div>
 
         {/* Action Buttons */}
-        <div className="flex justify-end gap-3">
-          {!isEditing ? (
-            <Button onClick={() => setIsEditing(true)} className="bg-slate-900 hover:bg-slate-800 text-white">
-              <Edit className="h-4 w-4 mr-2" />
-              Edit
+        {isEditing && (
+          <div className="flex justify-end gap-3">
+            <Button 
+              variant="outline" 
+              onClick={() => setIsEditing(false)}
+            >
+              Cancel
             </Button>
-          ) : (
-            <>
-              <Button 
-                variant="outline" 
-                onClick={() => setIsEditing(false)}
-              >
-                Cancel
-              </Button>
-              <Button 
-                onClick={handleSave} 
-                className="bg-slate-900 hover:bg-slate-800 text-white"
-                disabled={!hasChanges()}
-              >
-                Save
-              </Button>
-            </>
-          )}
-        </div>
+            <Button 
+              onClick={handleSave} 
+              className="bg-slate-900 hover:bg-slate-800 text-white"
+              disabled={!hasChanges()}
+            >
+              Save
+            </Button>
+          </div>
+        )}
 
       </div>
     </>

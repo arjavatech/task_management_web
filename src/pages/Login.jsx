@@ -9,6 +9,7 @@ import { useAuth } from '../contexts/AuthContext'
 import { Building2, Mail, Lock, LogIn, UserPlus, AlertCircle, ArrowRight, CheckCircle, Users, Target } from 'lucide-react'
 
 export default function Login() {
+  // ALL HOOKS MUST BE DECLARED FIRST
   const [isSignUp, setIsSignUp] = useState(false)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -20,12 +21,6 @@ export default function Login() {
   const navigate = useNavigate()
   const { user } = useAuth()
 
-  // Redirect if already logged in
-  if (user) {
-    return <Navigate to="/dashboard" replace />
-  }
-
-  // Auto-hide messages after 3 seconds
   useEffect(() => {
     if (message || error) {
       const timer = setTimeout(() => {
@@ -35,6 +30,11 @@ export default function Login() {
       return () => clearTimeout(timer)
     }
   }, [message, error])
+
+  // CONDITIONAL RENDERING AFTER ALL HOOKS
+  if (user) {
+    return <Navigate to="/dashboard" replace />
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault()

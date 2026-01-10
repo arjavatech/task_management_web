@@ -1,7 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import Login from './pages/Login'
-import Dashboard from './pages/Dashboard'
+import Dashboard from './pages/Dashboard2'
 import CompanyList from './pages/CompanyList'
 import CompanyPage from './pages/CompanyPage'
 import TaskTemplates from './pages/TaskTemplates'
@@ -16,6 +16,7 @@ import { Button } from '@/components/ui/button'
 import { LogOut } from 'lucide-react'
 
 function AppContent() {
+  // ALL HOOKS MUST BE DECLARED FIRST
   const { user, userProfile, loading, updateUserProfile } = useAuth()
   const [companies, setCompanies] = useState([])
   const [tasks, setTasks] = useState([])
@@ -23,10 +24,10 @@ function AppContent() {
   const [modal, setModal] = useState({ show: false, type: '', message: '' })
   const [dataLoading, setDataLoading] = useState(false)
   const [showConfirmSignout, setShowConfirmSignout] = useState(false)
+  const [profileLoading, setProfileLoading] = useState(false)
 
   const showModal = (type, message) => {
     setModal({ show: true, type, message })
-    // Auto-dismiss success toasts after 3 seconds
     if (type === 'success') {
       setTimeout(() => {
         setModal({ show: false, type: '', message: '' })
@@ -34,68 +35,49 @@ function AppContent() {
     }
   }
 
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     if (!user) return
-
     setDataLoading(true)
     try {
-      console.log('Loading data for user:', user.uid)
-
-      // Load all data in parallel
       const [companiesResult, tasksResult, templatesResult] = await Promise.all([
         getCompanies(user.uid),
         getTasks(user.uid),
         getTaskTemplates(user.uid)
       ])
 
-      console.log('Companies result:', companiesResult)
-      console.log('Tasks result:', tasksResult)
-      console.log('Templates result:', templatesResult)
-
       if (companiesResult.success) {
         setCompanies(companiesResult.data || [])
-        console.log('Companies loaded:', companiesResult.data?.length || 0)
       } else {
-        console.error('Failed to load companies:', companiesResult.error)
         setModal({ show: true, type: 'error', message: `Failed to load companies: ${companiesResult.error}` })
       }
 
       if (tasksResult.success) {
         setTasks(tasksResult.data || [])
-        console.log('Tasks loaded:', tasksResult.data?.length || 0)
-      } else {
-        console.error('Failed to load tasks:', tasksResult.error)
       }
 
       if (templatesResult.success) {
         setTaskTemplates(templatesResult.data || [])
-        console.log('Templates loaded:', templatesResult.data?.length || 0)
-      } else {
-        console.error('Failed to load templates:', templatesResult.error)
       }
     } catch (error) {
-      console.error('Error loading data:', error)
       setModal({ show: true, type: 'error', message: `Failed to load data: ${error.message}` })
     } finally {
       setDataLoading(false)
     }
-  }
+  }, [user])
 
   const { addCompany, editCompany, removeCompany, loading: companiesLoading } = useCompanies(loadData, showModal)
   const { addTask, editTask, removeTask, loading: tasksLoading } = useTasks(loadData, showModal)
   const { addTemplate, removeTemplate, assignTemplateToCompanies, loading: templatesLoading } = useTemplates(loadData, showModal)
 
-  // Load data when user logs in
   useEffect(() => {
-    if (user && userProfile) {
+    if (user) {
       loadData()
     } else {
-      // Clear data when user logs out
       setCompanies([])
       setTasks([])
       setTaskTemplates([])
     }
-  }, [user, userProfile])
+  }, [user, loadData])
 
   const logout = async () => {
     setShowConfirmSignout(true)
@@ -115,8 +97,6 @@ function AppContent() {
 
 
 
-  const [profileLoading, setProfileLoading] = useState(false)
-
   const updateProfile = async (profileData) => {
     setProfileLoading(true)
     const result = await updateUserProfile(profileData)
@@ -131,8 +111,13 @@ function AppContent() {
     return result
   }
 
+  // CONDITIONAL RENDERING AFTER ALL HOOKS
   if (loading) {
-    return <LoadingSpinner />
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <LoadingSpinner />
+      </div>
+    )
   }
 
   return (
