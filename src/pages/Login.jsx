@@ -51,7 +51,7 @@ export default function Login() {
           setIsSignUp(false)
           setPassword('') // Clear password for security
         } else {
-          setError(result.error)
+          setError(getFriendlyError(result.error))
         }
       } else {
         // Sign in
@@ -59,7 +59,7 @@ export default function Login() {
         if (result.success) {
           navigate('/dashboard')
         } else {
-          setError(result.error)
+          setError(getFriendlyError(result.error))
         }
       }
     } catch (err) {
@@ -67,6 +67,18 @@ export default function Login() {
     } finally {
       setLoading(false)
     }
+  }
+
+  const getFriendlyError = (errorMsg) => {
+    if (errorMsg.includes('invalid-credential') || errorMsg.includes('wrong-password') || errorMsg.includes('user-not-found'))
+      return 'Incorrect email or password. Please try again.'
+    if (errorMsg.includes('email-already-in-use'))
+      return 'An account with this email already exists.'
+    if (errorMsg.includes('weak-password'))
+      return 'Password must be at least 6 characters.'
+    if (errorMsg.includes('too-many-requests'))
+      return 'Too many failed attempts. Please try again later.'
+    return 'An error occurred. Please try again.'
   }
 
   const toggleMode = () => {
