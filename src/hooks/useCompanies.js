@@ -1,41 +1,61 @@
-import { useAuth } from '../contexts/AuthContext'
-import { getCompanies, createCompany, updateCompany, deleteCompany } from '../services/firebaseService'
-import { useApi } from './useApi'
+/**
+ * useCompanies — CRUD actions for companies with automatic feedback.
+ *
+ * Each action calls onDataChange() on success so the parent can reload
+ * the company list, and showModal() to display a toast or error dialog.
+ *
+ * @param {() => void}               onDataChange - Refresh callback (e.g. loadData in App.jsx).
+ * @param {(type, message) => void}  showModal    - Display feedback modal.
+ */
+import { createCompany, updateCompany, deleteCompany } from "../services/api"
+import { useApi } from "./useApi"
 
 export const useCompanies = (onDataChange, showModal) => {
-  const { user } = useAuth()
   const { loading, error, execute } = useApi()
 
+  /**
+   * Create a new company.
+   * @param {object} companyData - Company fields (name, ein, address, etc.)
+   */
   const addCompany = async (companyData) => {
     return execute(
-      () => createCompany(user.uid, companyData),
+      () => createCompany(companyData),
       () => {
         onDataChange?.()
-        showModal?.('success', 'Company added successfully!')
+        showModal?.("success", "Company added successfully!")
       },
-      (error) => showModal?.('error', error)
+      (error) => showModal?.("error", error)
     )
   }
 
+  /**
+   * Update an existing company.
+   * @param {string} id          - Firestore document ID of the company.
+   * @param {object} companyData - Updated company fields.
+   */
   const editCompany = async (id, companyData) => {
     return execute(
-      () => updateCompany(user.uid, id, companyData),
+      () => updateCompany(id, companyData),
       () => {
         onDataChange?.()
-        showModal?.('success', 'Company updated successfully!')
+        showModal?.("success", "Company updated successfully!")
       },
-      (error) => showModal?.('error', error)
+      (error) => showModal?.("error", error)
     )
   }
 
+  /**
+   * Delete a company by its document ID.
+   * @param {string} id - Firestore document ID of the company.
+   */
   const removeCompany = async (id) => {
     return execute(
-      () => deleteCompany(user.uid, id),
+      () => deleteCompany(id),
       () => {
         onDataChange?.()
-        showModal?.('success', 'Company deleted successfully!')
+        showModal?.("success", "Company deleted successfully!")
       },
-      (error) => showModal?.('error', error)
+      (error) => showModal?.("error", error)
     )
   }
 
