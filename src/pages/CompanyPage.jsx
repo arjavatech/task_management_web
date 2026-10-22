@@ -61,7 +61,7 @@ export default function CompanyPage({ companies, tasks, onUpdateCompany, onDelet
 
   const filteredTasks = companyTasks.filter(task =>
     task.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    task.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    task.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     task.status.toLowerCase().includes(searchTerm.toLowerCase())
   )
 

@@ -11,7 +11,7 @@ import { AuthProvider, useAuth } from './contexts/AuthContext'
 import { logoutUser } from './firebase/config'
 import { getCompanies, getTasks, getTaskTemplates } from './services/firebaseService'
 import { useCompanies, useTasks, useTemplates } from './hooks'
-import { LoadingSpinner } from './components/common'
+import { LoadingSpinner, ErrorBoundary } from './components/common'
 import { Button } from '@/components/ui/button'
 import { LogOut } from 'lucide-react'
 
@@ -39,8 +39,6 @@ function AppContent() {
 
     setDataLoading(true)
     try {
-      console.log('Loading data for user:', user.uid)
-
       // Load all data in parallel
       const [companiesResult, tasksResult, templatesResult] = await Promise.all([
         getCompanies(user.uid),
@@ -48,13 +46,8 @@ function AppContent() {
         getTaskTemplates(user.uid)
       ])
 
-      console.log('Companies result:', companiesResult)
-      console.log('Tasks result:', tasksResult)
-      console.log('Templates result:', templatesResult)
-
       if (companiesResult.success) {
         setCompanies(companiesResult.data || [])
-        console.log('Companies loaded:', companiesResult.data?.length || 0)
       } else {
         console.error('Failed to load companies:', companiesResult.error)
         setModal({ show: true, type: 'error', message: `Failed to load companies: ${companiesResult.error}` })
@@ -62,14 +55,12 @@ function AppContent() {
 
       if (tasksResult.success) {
         setTasks(tasksResult.data || [])
-        console.log('Tasks loaded:', tasksResult.data?.length || 0)
       } else {
         console.error('Failed to load tasks:', tasksResult.error)
       }
 
       if (templatesResult.success) {
         setTaskTemplates(templatesResult.data || [])
-        console.log('Templates loaded:', templatesResult.data?.length || 0)
       } else {
         console.error('Failed to load templates:', templatesResult.error)
       }
@@ -285,9 +276,11 @@ function AppContent() {
 
 function App() {
   return (
-    <AuthProvider>
-      <AppContent />
-    </AuthProvider>
+    <ErrorBoundary>
+      <AuthProvider>
+        <AppContent />
+      </AuthProvider>
+    </ErrorBoundary>
   )
 }
 

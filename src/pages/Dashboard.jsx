@@ -15,7 +15,9 @@ export default function Dashboard2({ tasks, companies }) {
     const now = new Date()
     const dayOfWeek = now.getDay()
     const diff = now.getDate() - dayOfWeek
-    return new Date(now.setDate(diff))
+    const start = new Date(now)
+    start.setDate(diff)
+    return start
   }
 
   const getWeekEnd = () => {
