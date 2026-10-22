@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { useState, useEffect } from 'react'
 import Login from './pages/Login'
 import Dashboard from './pages/Dashboard'
@@ -14,6 +14,11 @@ import { useCompanies, useTasks, useTemplates } from './hooks'
 import { LoadingSpinner, ErrorBoundary } from './components/common'
 import { Button } from '@/components/ui/button'
 import { LogOut } from 'lucide-react'
+
+function BoundaryByRoute({ children }) {
+  const location = useLocation()
+  return <ErrorBoundary key={location.pathname}>{children}</ErrorBoundary>
+}
 
 function AppContent() {
   const { user, userProfile, loading, updateUserProfile } = useAuth()
@@ -128,6 +133,7 @@ function AppContent() {
 
   return (
     <Router>
+      <BoundaryByRoute>
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/" element={
@@ -270,17 +276,16 @@ function AppContent() {
           </div>
         </div>
       )}
+      </BoundaryByRoute>
     </Router>
   )
 }
 
 function App() {
   return (
-    <ErrorBoundary>
-      <AuthProvider>
-        <AppContent />
-      </AuthProvider>
-    </ErrorBoundary>
+    <AuthProvider>
+      <AppContent />
+    </AuthProvider>
   )
 }
 
