@@ -1,6 +1,6 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app"
-import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from "firebase/auth"
+import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, updateProfile } from "firebase/auth"
 import { getFirestore, collection, doc, addDoc, updateDoc, deleteDoc, getDoc, getDocs, query, where, orderBy, limit } from "firebase/firestore"
 
 // Firebase Configuration from environment variables
@@ -30,9 +30,12 @@ export const loginUser = async (email, password) => {
   }
 }
 
-export const registerUser = async (email, password) => {
+export const registerUser = async (email, password, name = '') => {
   try {
     const userCredential = await createUserWithEmailAndPassword(auth, email, password)
+    if (name) {
+      await updateProfile(userCredential.user, { displayName: name })
+    }
     return { success: true, user: userCredential.user }
   } catch (error) {
     return { success: false, error: error.message }

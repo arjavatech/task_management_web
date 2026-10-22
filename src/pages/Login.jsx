@@ -20,12 +20,7 @@ export default function Login() {
   const navigate = useNavigate()
   const { user } = useAuth()
 
-  // Redirect if already logged in
-  if (user) {
-    return <Navigate to="/dashboard" replace />
-  }
-
-  // Auto-hide messages after 3 seconds
+  // Auto-hide messages after 3 seconds — must be before any early return (Rules of Hooks)
   useEffect(() => {
     if (message || error) {
       const timer = setTimeout(() => {
@@ -36,37 +31,9 @@ export default function Login() {
     }
   }, [message, error])
 
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-    setLoading(true)
-    setError('')
-    setMessage('')
-
-    try {
-      if (isSignUp) {
-        // Sign up
-        const result = await registerUser(email, password)
-        if (result.success) {
-          setMessage('Account created successfully! You can now sign in.')
-          setIsSignUp(false)
-          setPassword('') // Clear password for security
-        } else {
-          setError(getFriendlyError(result.error))
-        }
-      } else {
-        // Sign in
-        const result = await loginUser(email, password)
-        if (result.success) {
-          navigate('/dashboard')
-        } else {
-          setError(getFriendlyError(result.error))
-        }
-      }
-    } catch (err) {
-      setError('An unexpected error occurred. Please try again.')
-    } finally {
-      setLoading(false)
-    }
+  // Redirect if already logged in
+  if (user) {
+    return <Navigate to="/dashboard" replace />
   }
 
   const getFriendlyError = (errorMsg) => {
@@ -79,6 +46,37 @@ export default function Login() {
     if (errorMsg.includes('too-many-requests'))
       return 'Too many failed attempts. Please try again later.'
     return 'An error occurred. Please try again.'
+  }
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    setLoading(true)
+    setError('')
+    setMessage('')
+
+    try {
+      if (isSignUp) {
+        const result = await registerUser(email, password, name)
+        if (result.success) {
+          setMessage('Account created successfully! You can now sign in.')
+          setIsSignUp(false)
+          setPassword('')
+        } else {
+          setError(getFriendlyError(result.error))
+        }
+      } else {
+        const result = await loginUser(email, password)
+        if (result.success) {
+          navigate('/dashboard')
+        } else {
+          setError(getFriendlyError(result.error))
+        }
+      }
+    } catch (err) {
+      setError('An unexpected error occurred. Please try again.')
+    } finally {
+      setLoading(false)
+    }
   }
 
   const toggleMode = () => {
